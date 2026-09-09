@@ -3,3 +3,5 @@ title: "My first weeks in MDS"
 author: "Audrey Tsung"
 date: 2026-09-9
 ---
+
+![Me sitting under a tree!](../../images/first-week.jpg){width=250, fig-align="left"}
