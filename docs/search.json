@@ -11,12 +11,12 @@
     "href": "index.html",
     "title": "Audrey Tsung",
     "section": "",
-    "text": "Hi, my name is Audrey and I am from Vancouver, BC. I completed a BSc in Computer Science with a minor in Data Science at UBC, where I developed a strong interes AI/ML systems evaluation and large-scale data workflows. This interest ultimately led me to pursue the Master of Data Science program. This website documents my experiences, learning journey, and personal growth throughout the MDS program.\nThis is a Quarto website.\nTo learn more about Quarto websites visit https://quarto.org/docs/websites."
+    "text": "Hi, my name is Audrey and I am from Vancouver, BC. I completed a BSc in Computer Science with a minor in Data Science at UBC, where I developed a strong interest in AI/ML systems evaluation and large-scale data workflows. This interest ultimately led me to pursue the Master of Data Science program. This website documents my experiences, learning journey, and personal growth throughout the MDS program.\nThis is a Quarto website.\nTo learn more about Quarto websites visit https://quarto.org/docs/websites."
   },
   {
     "objectID": "about.html",
     "href": "about.html",
-    "title": "About Me!",
+    "title": "About",
     "section": "",
     "text": "Background\nI grew up in Vancouver, BC my whole life and like to say that I know about good local eats and sweet treats :p\n\n\nOutside of DS\nAbout this site"
   }

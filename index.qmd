@@ -6,7 +6,7 @@ about:
     image-shape: round
 ---
 
-Hi, my name is Audrey and I am from Vancouver, BC. I completed a BSc in Computer Science with a minor in Data Science at UBC, where I developed a strong interes AI/ML systems evaluation and large-scale data workflows. This interest ultimately led me to pursue the Master of Data Science program. This website documents my experiences, learning journey, and personal growth throughout the MDS program.
+Hi, my name is Audrey and I am from Vancouver, BC. I completed a BSc in Computer Science with a minor in Data Science at UBC, where I developed a strong interest in AI/ML systems evaluation and large-scale data workflows. This interest ultimately led me to pursue the Master of Data Science program. This website documents my experiences, learning journey, and personal growth throughout the MDS program.
 
 This is a Quarto website.
 
