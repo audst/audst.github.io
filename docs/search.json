@@ -2,15 +2,15 @@
   {
     "objectID": "about.html",
     "href": "about.html",
-    "title": "About",
+    "title": "About Me!",
     "section": "",
-    "text": "About this site"
+    "text": "Background\nI grew up in Vancouver, BC my whole life and like to say that I know about good local eats and sweet treats :p\n\n\nOutside of DS\nAbout this site"
   },
   {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "audrey!",
+    "title": "Audrey Tsung",
     "section": "",
-    "text": "This is a Quarto website.\nTo learn more about Quarto websites visit https://quarto.org/docs/websites."
+    "text": "Hi, my name is Audrey and I am from Vancouver, BC. I studied at UBC for my undergraduate in CS and minored in DSCI, which cultivated an interest that ultimately lead me to pursue MDS. I hope to deepen my knowledge in DSCI and gain career experience along the way!\nThis is a Quarto website.\nTo learn more about Quarto websites visit https://quarto.org/docs/websites."
   }
 ]

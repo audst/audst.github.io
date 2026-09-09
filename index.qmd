@@ -1,10 +1,12 @@
 ---
-title: "audrey!"
+title: "Audrey Tsung"
 image: images/psyduck.jpg
 about: 
     template: jolla
     image-shape: round
 ---
+
+Hi, my name is Audrey and I am from Vancouver, BC. I studied at UBC for my undergraduate in CS and minored in DSCI, which cultivated an interest that ultimately lead me to pursue MDS. I hope to deepen my knowledge in DSCI and gain career experience along the way!
 
 This is a Quarto website.
 

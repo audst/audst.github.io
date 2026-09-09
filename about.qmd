@@ -1,5 +1,9 @@
 ---
-title: "About"
+title: "About Me!"
 ---
+### Background
+I grew up in Vancouver, BC my whole life and like to say that I know about good local eats and sweet treats :p
+
+### Outside of DS
 
 About this site
