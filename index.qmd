@@ -1,5 +1,9 @@
 ---
 title: "audrey!"
+image: images/psyduck.jpg
+about: 
+    template: jolla
+    image-shape: round
 ---
 
 This is a Quarto website.
