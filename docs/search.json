@@ -1,10 +1,10 @@
 [
   {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "About Me!",
+    "objectID": "blog.html",
+    "href": "blog.html",
+    "title": "Blog",
     "section": "",
-    "text": "Background\nI grew up in Vancouver, BC my whole life and like to say that I know about good local eats and sweet treats :p\n\n\nOutside of DS\nAbout this site"
+    "text": "My first weeks in MDS\n\n\n\n\n\n\nAudrey Tsung\n\n\nSep 9, 2026\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "index.html",
@@ -14,17 +14,10 @@
     "text": "Hi, my name is Audrey and I am from Vancouver, BC. I completed a BSc in Computer Science with a minor in Data Science at UBC, where I developed a strong interes AI/ML systems evaluation and large-scale data workflows. This interest ultimately led me to pursue the Master of Data Science program. This website documents my experiences, learning journey, and personal growth throughout the MDS program.\nThis is a Quarto website.\nTo learn more about Quarto websites visit https://quarto.org/docs/websites."
   },
   {
-    "objectID": "posts/first-weeks/index.html",
-    "href": "posts/first-weeks/index.html",
-    "title": "My first weeks in MDS",
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About Me!",
     "section": "",
-    "text": "My first couple weeks of MDS have been a bit surreal. Coming back to UBC Campus after my undergraduate degree here is a big blessing, there are so many familar and unfamiliar things that I wish to explore.\nClasses have been busy and hectic but that is something that is to be expected for an accelerated program."
-  },
-  {
-    "objectID": "blog.html",
-    "href": "blog.html",
-    "title": "Blog",
-    "section": "",
-    "text": "My first weeks in MDS\n\n\n\n\n\n\n\n\nSep 9, 2026\n\n\nAudrey Tsung\n\n\n\n\n\nNo matching items"
+    "text": "Background\nI grew up in Vancouver, BC my whole life and like to say that I know about good local eats and sweet treats :p\n\n\nOutside of DS\nAbout this site"
   }
 ]
