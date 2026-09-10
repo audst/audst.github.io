@@ -1,0 +1,19 @@
+/*-- scss:defaults --*/
+$body-bg:              #fff8fb;
+$body-color:           #35242b;
+$primary:              #d96b8d;
+$secondary:            #9f6378;
+$link-color:           #b54870;
+$navbar-bg:            #ffd1df;
+$navbar-fg:            #35242b;
+$selection-bg:         #ffd1df;
+$border-color:         #f0c4d2;
+$code-bg:              #fff0f5;
+$code-color:           #9d3e61;
+$h2-font-size:         1.6rem !default;
+$headings-font-weight: 500 !default;
+
+/*-- scss:rules --*/
+h1, h2, h3, h4, h5, h6 {
+  text-shadow: -1px -1px 0 rgba(0, 0, 0, .3);
+}

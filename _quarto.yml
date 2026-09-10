@@ -4,6 +4,7 @@ project:
 
 website:
   title: "Audrey Tsung"
+  favicon: images/favicon.svg
   navbar:
     left:
       - href: index.qmd
@@ -16,8 +17,8 @@ website:
 format:
   html:
     theme:
-      light: [cosmo, ../theme.scss]
-      dark: [cosmo, ../theme-dark.scss]
+      light: [cosmo, theme.scss]
+      dark: [cosmo, theme-dark.scss]
     css: styles.css
     toc: true
 
