@@ -2,8 +2,13 @@
 title: "About"
 ---
 ### Background
-I grew up in Vancouver, BC my whole life and like to say that I know about good local eats and sweet treats :p
+I grew up in Vancouver, BC my whole life and like to say that I know about good local eats and sweet treats! I recently wrapped up my undergrad at UBC studying Computer Science and Data Science, and I am so excited to be back on campus this fall starting my Master of Data Science! Professionally, I recently worked as a Data Analyst evaluating AI and machine learning systems. I spend a lot of time stress-testing large language models for hallucinations and reasoning faults, which is a pretty fun way to look under the hood of modern AI.
 
-### Outside of DS
+### Why Data Science?
+If I had to sum it up, Data Science is the perfect sweet spot between logical problem-solving and creative storytelling. During my undergrad, I realized I didn't just want to write code—I wanted to understand the "why" behind the information we interact with every day. Whether I'm building end-to-end data pipelines, evaluating large language models for reasoning faults, or diving into statistical learning theory, I love the puzzle of turning raw, messy data into something meaningful and actionable. It’s a field that constantly keeps me on my toes, and I am so excited to dive even deeper into the world of machine learning and AI during my Master's program!
 
-About this site
+### Outside of Data Science
+When I’m not writing studying, I’m usually swapping my keyboard for some kind of granny activity. I love making cute amigurumi crochet, making everything from little plushies to full pixel grid panels. I also spend a lot of my downtime in the kitchen baking—my current obsessions are ceremonial matcha checkerboard cookies and a twist on the classic tiramisu with basque cheesecake. If I’m just relaxing, you can probably catch me sitting at my PC curating Spotify playlists for very specific moods, losing my mind playing Riot games, or organizing my entire life into a hyper-detailed Notion dashboard.
+
+### About this site
+I created this little corner of the internet as both a digital portfolio and a personal sandbox. While a piece of this site actually started out as a class assignment, it has quickly evolved into a space where my technical side and my creative hobbies get to live in the same room!
