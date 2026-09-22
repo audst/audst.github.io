@@ -1,0 +1,17 @@
+---
+title: "Yu-Gi-Oh! Raw Strength vs. Banlist"
+author: "Audrey Tsung"
+date: "2026-09-21"
+---
+
+Data: [YGOPRODeck API](https://ygoprodeck.com/api-guide/), pre-processed to remove text descriptions. Data is provided for community use.
+
+```{r}
+#| message: false
+#| warning: false
+library(dplyr)
+library(ggplot2)
+library(readr)
+
+
+ygo_data = pd.read_csv("../../data/ygo_staples_data.csv")
