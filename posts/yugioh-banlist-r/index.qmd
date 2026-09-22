@@ -21,6 +21,6 @@ The complete raw API payload contains lengthy text descriptions, localized strin
 library(dplyr)
 library(ggplot2)
 library(readr)
-
+```
 
 ygo_data = pd.read_csv("../../data/ygo_staples_data.csv")

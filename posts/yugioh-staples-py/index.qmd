@@ -19,6 +19,7 @@ To ensure self-contained, offline reproducibility without triggering live API ra
 #| warning: false
 import pandas as pd
 import altair as altair
+```
 
 
 ygo_data = pd.read_csv("../../data/ygo_staples_data.csv")
