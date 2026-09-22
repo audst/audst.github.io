@@ -11,7 +11,7 @@
     "href": "blog.html",
     "title": "Blog",
     "section": "",
-    "text": "Week 1 of MDS\n\n\n\n\n\n\nAudrey Tsung\n\n\nSep 9, 2026\n\n\n\n\n\n\nNo matching items"
+    "text": "Yu-Gi-Oh! Staple Cards Analysis\n\n\n\n\n\n\nAudrey Tsung\n\n\nSep 21, 2026\n\n\n\n\n\n\n\n\n\n\n\nYu-Gi-Oh! Raw Strength vs. Banlist\n\n\n\n\n\n\nAudrey Tsung\n\n\nSep 21, 2026\n\n\n\n\n\n\n\n\n\n\n\nWeek 1 of MDS\n\n\n\n\n\n\nAudrey Tsung\n\n\nSep 9, 2026\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "about.html",
@@ -26,5 +26,19 @@
     "title": "Audrey Tsung",
     "section": "",
     "text": "Hi, my name is Audrey and I am from Vancouver, BC. I completed a BSc in Computer Science with a minor in Data Science at UBC, where I developed a strong interest in AI/ML systems evaluation and large-scale data workflows. This interest ultimately led me to pursue the Master of Data Science program. This website documents my experiences, learning journey, and personal growth throughout the MDS program."
+  },
+  {
+    "objectID": "posts/yugioh-staples-py/index.html",
+    "href": "posts/yugioh-staples-py/index.html",
+    "title": "Yu-Gi-Oh! Staple Cards Analysis",
+    "section": "",
+    "text": "Data: YGOPRODeck API, pre-processed to remove text descriptions. Data is provided for community use.\n#| message: false #| warning: false import pandas as pd import altair as altair\nygo_data = pd.read_csv(“../../data/ygo_staples_data.csv”)"
+  },
+  {
+    "objectID": "posts/yugioh-banlist-r/index.html",
+    "href": "posts/yugioh-banlist-r/index.html",
+    "title": "Yu-Gi-Oh! Raw Strength vs. Banlist",
+    "section": "",
+    "text": "Data: YGOPRODeck API, pre-processed to remove text descriptions. Data is provided for community use.\n#| message: false #| warning: false library(dplyr) library(ggplot2) library(readr)\nygo_data = pd.read_csv(“../../data/ygo_staples_data.csv”)"
   }
 ]
