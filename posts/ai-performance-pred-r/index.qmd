@@ -28,3 +28,4 @@ benchmark_data <- benchmark_data |>
 benchmark_data |> 
   select(benchmark_name, category, Is_Superhuman) |> 
   glimpse()
+```
