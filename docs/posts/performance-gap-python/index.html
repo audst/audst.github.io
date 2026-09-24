@@ -9,7 +9,7 @@
 <meta name="author" content="Audrey Tsung">
 <meta name="dcterms.date" content="2026-09-24">
 
-<title>Clustering the AI vs.&nbsp;Human Performance Gap – Audrey Tsung</title>
+<title>The Abstract Reasoning Gap: Human vs.&nbsp;Machine – Audrey Tsung</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -28,10 +28,45 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
-<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -80,6 +115,9 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
 
 <link rel="stylesheet" href="../../styles.css">
@@ -294,8 +332,6 @@ ul.task-list li input[type="checkbox"] {
    
   <ul>
   <li><a href="#data-source-pre-processing" id="toc-data-source-pre-processing" class="nav-link active" data-scroll-target="#data-source-pre-processing">Data Source &amp; Pre-processing</a></li>
-  <li><a href="#load-the-benchmark-dataset" id="toc-load-the-benchmark-dataset" class="nav-link" data-scroll-target="#load-the-benchmark-dataset">Load the benchmark dataset</a></li>
-  <li><a href="#preview-the-data" id="toc-preview-the-data" class="nav-link" data-scroll-target="#preview-the-data">Preview the data</a></li>
   </ul>
 </nav>
     </div>
@@ -305,7 +341,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Clustering the AI vs.&nbsp;Human Performance Gap</h1>
+<h1 class="title">The Abstract Reasoning Gap: Human vs.&nbsp;Machine</h1>
 </div>
 
 
@@ -334,19 +370,162 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
+<p>Recent headlines about autonomous AI agents executing real-world cyber breaches make it easy to feel like agentic ai is something within reach. It can feel really daunting without any understanding of the underlying capabilities and limitations. That tension between alarming headlines and actual benchmark rigor is why I chose this dataset. As the race for agentic AI intensifies, it’s crucial to separate the signal from the noise.</p>
+<p>Whenever a lab claims a model has “surpassed human performance,” my immediate reaction is skepticism: <em>Which humans, and evaluated under what conditions?</em></p>
+<p>While marketing hype treats the “human baseline” as a monolithic gold standard, the reality ranges from IMO gold medalists to crowdworkers who gave up on 70% of the problems.</p>
+<p>My goal for this post is to dig into item-level ConceptARC data, benchmarking 482 human testers against machine solvers on the exact same abstract reasoning tasks. A decision tree might seem simplistic compared to modern large language models, but training one across 16 cognitive concepts cuts through the noise. It lets us map exactly where the “superhuman” narrative holds up, and where human intuition still wins.</p>
 <section id="data-source-pre-processing" class="level2">
 <h2 class="anchored" data-anchor-id="data-source-pre-processing">Data Source &amp; Pre-processing</h2>
-<p>The dataset for this analysis is sourced from the <a href="https://www.kaggle.com/datasets/kylefengkfeng209/ai-benchmarks-vs-human-baselines">AI Benchmarks vs Human Baselines</a> repository on Kaggle. It aggregates top model scores across dozens of cognitive benchmarks and compares them to human baselines.</p>
-<p>To ensure offline reproducibility and adhere to file size constraints, a static snapshot of the dataset was committed to <code>data/benchmarks.csv</code>.</p>
-<p>#| message: false #| warning: false import pandas as pd import altair as alt from sklearn.cluster import KMeans from sklearn.preprocessing import StandardScaler</p>
-</section>
-<section id="load-the-benchmark-dataset" class="level1">
-<h1>Load the benchmark dataset</h1>
-<p>benchmark_data = pd.read_csv(“../../data/benchmarks.csv”)</p>
-</section>
-<section id="preview-the-data" class="level1">
-<h1>Preview the data</h1>
-<p>benchmark_data[[‘benchmark_name’, ‘category’, ‘human_baseline’, ‘ai_top_score’]].head()</p>
+<p>This analysis utilizes item-level test data from the <a href="https://www.kaggle.com/datasets/kylefengkfeng209/ai-benchmarks-vs-human-baselines">AI Benchmarks vs Human Baselines</a> dataset. We examine <code>conceptarc_human_vs_machine.csv</code>, which records success rates across 528 identical abstract reasoning tasks.</p>
+<div id="fig-conceptarc-gap" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-message="false" data-execution_count="1">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-conceptarc-gap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> altair <span class="im">as</span> alt</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.tree <span class="im">import</span> DecisionTreeClassifier</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> accuracy_score</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-conceptarc-gap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1
+</figcaption>
+</figure>
+</div>
+<div id="04b41b52" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the dataset</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>conceptarc <span class="op">=</span> pd.read_csv(<span class="st">"data/conceptarc_human_vs_machine.csv"</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>conceptarc.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="2">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">task_file</th>
+<th data-quarto-table-cell-role="th">concept_group</th>
+<th data-quarto-table-cell-role="th">task_number</th>
+<th data-quarto-table-cell-role="th">is_minimal_task</th>
+<th data-quarto-table-cell-role="th">test_input_index</th>
+<th data-quarto-table-cell-role="th">humans_solved</th>
+<th data-quarto-table-cell-role="th">humans_failed</th>
+<th data-quarto-table-cell-role="th">human_attempts</th>
+<th data-quarto-table-cell-role="th">human_accuracy</th>
+<th data-quarto-table-cell-role="th">kaggle_first_place_correct</th>
+<th data-quarto-table-cell-role="th">kaggle_second_place_correct</th>
+<th data-quarto-table-cell-role="th">gpt4_temp0_correct</th>
+<th data-quarto-table-cell-role="th">gpt4_temp05_correct</th>
+<th data-quarto-table-cell-role="th">n_machine_solvers_correct</th>
+<th data-quarto-table-cell-role="th">human_minus_best_machine</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>AboveBelow1.json</td>
+<td>AboveBelow</td>
+<td>1.0</td>
+<td>0</td>
+<td>0</td>
+<td>8</td>
+<td>0</td>
+<td>8</td>
+<td>1.0000</td>
+<td>1.0</td>
+<td>0.0</td>
+<td>1.0</td>
+<td>1.0</td>
+<td>3.0</td>
+<td>0.0000</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>AboveBelow1.json</td>
+<td>AboveBelow</td>
+<td>1.0</td>
+<td>0</td>
+<td>1</td>
+<td>7</td>
+<td>1</td>
+<td>8</td>
+<td>0.8750</td>
+<td>1.0</td>
+<td>1.0</td>
+<td>1.0</td>
+<td>1.0</td>
+<td>4.0</td>
+<td>-0.1250</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>AboveBelow1.json</td>
+<td>AboveBelow</td>
+<td>1.0</td>
+<td>0</td>
+<td>2</td>
+<td>7</td>
+<td>1</td>
+<td>8</td>
+<td>0.8750</td>
+<td>1.0</td>
+<td>0.0</td>
+<td>1.0</td>
+<td>1.0</td>
+<td>3.0</td>
+<td>-0.1250</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>AboveBelow10.json</td>
+<td>AboveBelow</td>
+<td>10.0</td>
+<td>0</td>
+<td>0</td>
+<td>8</td>
+<td>0</td>
+<td>8</td>
+<td>1.0000</td>
+<td>1.0</td>
+<td>1.0</td>
+<td>0.0</td>
+<td>1.0</td>
+<td>3.0</td>
+<td>0.0000</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>AboveBelow10.json</td>
+<td>AboveBelow</td>
+<td>10.0</td>
+<td>0</td>
+<td>1</td>
+<td>8</td>
+<td>1</td>
+<td>9</td>
+<td>0.8889</td>
+<td>1.0</td>
+<td>1.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>2.0</td>
+<td>-0.1111</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="1a1de450" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(Path.cwd())</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(Path(<span class="st">"data/conceptarc_human_vs_machine.csv"</span>).exists())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>/Users/audreytsung/mds/audst/audst.github.io
+True</code></pre>
+</div>
+</div>
 
 
 </section>

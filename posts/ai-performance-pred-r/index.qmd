@@ -18,14 +18,6 @@ library(dplyr)
 library(ggplot2)
 
 # Load the curated dataset
-benchmark_data <- read_csv("../../data/benchmarks.csv", show_col_types = FALSE)
-
-# Create the binary target variable for the model
-benchmark_data <- benchmark_data |> 
-  mutate(Is_Superhuman = ifelse(ai_top_score > human_baseline, 1, 0))
-
-# Inspect the modeling features
-benchmark_data |> 
-  select(benchmark_name, category, Is_Superhuman) |> 
-  glimpse()
+benchmarks <- read_csv("data/benchmarks.csv", show_col_types = FALSE)
+head(benchmarks)
 ```
