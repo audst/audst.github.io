@@ -1,0 +1,25 @@
+---
+title: "Clustering the AI vs. Human Performance Gap"
+author: "Audrey Tsung"
+date: "2026-09-24"
+---
+
+## Data Source & Pre-processing
+
+The dataset for this analysis is sourced from the [AI Benchmarks vs Human Baselines](https://www.kaggle.com/datasets/kylefengkfeng209/ai-benchmarks-vs-human-baselines) repository on Kaggle. It aggregates top model scores across dozens of cognitive benchmarks and compares them to human baselines.
+
+To ensure offline reproducibility and adhere to file size constraints, a static snapshot of the dataset was committed to `data/benchmarks.csv`. 
+
+```{python}
+#| message: false
+#| warning: false
+import pandas as pd
+import altair as alt
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+
+# Load the benchmark dataset
+benchmark_data = pd.read_csv("../../data/benchmarks.csv")
+
+# Preview the data
+benchmark_data[['benchmark_name', 'category', 'human_baseline', 'ai_top_score']].head()

@@ -2,8 +2,8 @@
   {
     "listing": "/blog.html",
     "items": [
-      "/posts/yugioh-staples-py/index.html",
-      "/posts/yugioh-banlist-r/index.html",
+      "/posts/performance-gap-python/index.html",
+      "/posts/ai-performance-pred-r/index.html",
       "/posts/first-weeks/index.html"
     ]
   }

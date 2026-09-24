@@ -1,0 +1,30 @@
+---
+title: "Predicting Superhuman AI Performance by Task Category"
+author: "Audrey Tsung"
+date: "2026-09-24"
+---
+
+## Data Source & Pre-processing
+
+This analysis investigates the cognitive domains where AI exceeds human capabilities using the [AI Benchmarks vs Human Baselines](https://www.kaggle.com/datasets/kylefengkfeng209/ai-benchmarks-vs-human-baselines) Kaggle dataset.
+
+To ensure offline reproducibility and adhere to file size constraints, a static snapshot of the dataset was committed to `data/benchmarks.csv`. 
+
+```{r}
+#| message: false
+#| warning: false
+library(readr)
+library(dplyr)
+library(ggplot2)
+
+# Load the curated dataset
+benchmark_data <- read_csv("../../data/benchmarks.csv", show_col_types = FALSE)
+
+# Create the binary target variable for the model
+benchmark_data <- benchmark_data |> 
+  mutate(Is_Superhuman = ifelse(ai_top_score > human_baseline, 1, 0))
+
+# Inspect the modeling features
+benchmark_data |> 
+  select(benchmark_name, category, Is_Superhuman) |> 
+  glimpse()

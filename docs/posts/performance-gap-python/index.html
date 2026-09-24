@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Audrey Tsung">
-<meta name="dcterms.date" content="2026-09-21">
+<meta name="dcterms.date" content="2026-09-24">
 
-<title>Yu-Gi-Oh! Staple Cards Analysis – Audrey Tsung</title>
+<title>Clustering the AI vs.&nbsp;Human Performance Gap – Audrey Tsung</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -288,8 +288,16 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#data-source-pre-processing" id="toc-data-source-pre-processing" class="nav-link active" data-scroll-target="#data-source-pre-processing">Data Source &amp; Pre-processing</a></li>
+  <li><a href="#load-the-benchmark-dataset" id="toc-load-the-benchmark-dataset" class="nav-link" data-scroll-target="#load-the-benchmark-dataset">Load the benchmark dataset</a></li>
+  <li><a href="#preview-the-data" id="toc-preview-the-data" class="nav-link" data-scroll-target="#preview-the-data">Preview the data</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -297,7 +305,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Yu-Gi-Oh! Staple Cards Analysis</h1>
+<h1 class="title">Clustering the AI vs.&nbsp;Human Performance Gap</h1>
 </div>
 
 
@@ -314,7 +322,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">September 21, 2026</p>
+      <p class="date">September 24, 2026</p>
     </div>
   </div>
   
@@ -326,11 +334,22 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Data: <a href="https://ygoprodeck.com/api-guide/">YGOPRODeck API</a>, pre-processed to remove text descriptions. Data is provided for community use.</p>
-<p>#| message: false #| warning: false import pandas as pd import altair as altair</p>
-<p>ygo_data = pd.read_csv(“../../data/ygo_staples_data.csv”)</p>
+<section id="data-source-pre-processing" class="level2">
+<h2 class="anchored" data-anchor-id="data-source-pre-processing">Data Source &amp; Pre-processing</h2>
+<p>The dataset for this analysis is sourced from the <a href="https://www.kaggle.com/datasets/kylefengkfeng209/ai-benchmarks-vs-human-baselines">AI Benchmarks vs Human Baselines</a> repository on Kaggle. It aggregates top model scores across dozens of cognitive benchmarks and compares them to human baselines.</p>
+<p>To ensure offline reproducibility and adhere to file size constraints, a static snapshot of the dataset was committed to <code>data/benchmarks.csv</code>.</p>
+<p>#| message: false #| warning: false import pandas as pd import altair as alt from sklearn.cluster import KMeans from sklearn.preprocessing import StandardScaler</p>
+</section>
+<section id="load-the-benchmark-dataset" class="level1">
+<h1>Load the benchmark dataset</h1>
+<p>benchmark_data = pd.read_csv(“../../data/benchmarks.csv”)</p>
+</section>
+<section id="preview-the-data" class="level1">
+<h1>Preview the data</h1>
+<p>benchmark_data[[‘benchmark_name’, ‘category’, ‘human_baseline’, ‘ai_top_score’]].head()</p>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

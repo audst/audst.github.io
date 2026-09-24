@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Audrey Tsung">
-<meta name="dcterms.date" content="2026-09-21">
+<meta name="dcterms.date" content="2026-09-24">
 
-<title>Yu-Gi-Oh! Raw Strength vs.&nbsp;Banlist – Audrey Tsung</title>
+<title>Predicting Superhuman AI Performance by Task Category – Audrey Tsung</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -288,8 +288,17 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#data-source-pre-processing" id="toc-data-source-pre-processing" class="nav-link active" data-scroll-target="#data-source-pre-processing">Data Source &amp; Pre-processing</a></li>
+  <li><a href="#load-the-curated-dataset" id="toc-load-the-curated-dataset" class="nav-link" data-scroll-target="#load-the-curated-dataset">Load the curated dataset</a></li>
+  <li><a href="#create-the-binary-target-variable-for-the-model" id="toc-create-the-binary-target-variable-for-the-model" class="nav-link" data-scroll-target="#create-the-binary-target-variable-for-the-model">Create the binary target variable for the model</a></li>
+  <li><a href="#inspect-the-modeling-features" id="toc-inspect-the-modeling-features" class="nav-link" data-scroll-target="#inspect-the-modeling-features">Inspect the modeling features</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -297,7 +306,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Yu-Gi-Oh! Raw Strength vs.&nbsp;Banlist</h1>
+<h1 class="title">Predicting Superhuman AI Performance by Task Category</h1>
 </div>
 
 
@@ -314,7 +323,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">September 21, 2026</p>
+      <p class="date">September 24, 2026</p>
     </div>
   </div>
   
@@ -326,11 +335,26 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Data: <a href="https://ygoprodeck.com/api-guide/">YGOPRODeck API</a>, pre-processed to remove text descriptions. Data is provided for community use.</p>
-<p>#| message: false #| warning: false library(dplyr) library(ggplot2) library(readr)</p>
-<p>ygo_data = pd.read_csv(“../../data/ygo_staples_data.csv”)</p>
+<section id="data-source-pre-processing" class="level2">
+<h2 class="anchored" data-anchor-id="data-source-pre-processing">Data Source &amp; Pre-processing</h2>
+<p>This analysis investigates the cognitive domains where AI exceeds human capabilities using the <a href="https://www.kaggle.com/datasets/kylefengkfeng209/ai-benchmarks-vs-human-baselines">AI Benchmarks vs Human Baselines</a> Kaggle dataset.</p>
+<p>To ensure offline reproducibility and adhere to file size constraints, a static snapshot of the dataset was committed to <code>data/benchmarks.csv</code>.</p>
+<p>#| message: false #| warning: false library(readr) library(dplyr) library(ggplot2)</p>
+</section>
+<section id="load-the-curated-dataset" class="level1">
+<h1>Load the curated dataset</h1>
+<p>benchmark_data &lt;- read_csv(“../../data/benchmarks.csv”, show_col_types = FALSE)</p>
+</section>
+<section id="create-the-binary-target-variable-for-the-model" class="level1">
+<h1>Create the binary target variable for the model</h1>
+<p>benchmark_data &lt;- benchmark_data |&gt; mutate(Is_Superhuman = ifelse(ai_top_score &gt; human_baseline, 1, 0))</p>
+</section>
+<section id="inspect-the-modeling-features" class="level1">
+<h1>Inspect the modeling features</h1>
+<p>benchmark_data |&gt; select(benchmark_name, category, Is_Superhuman) |&gt; glimpse()</p>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
