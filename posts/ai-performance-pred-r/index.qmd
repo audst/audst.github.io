@@ -50,3 +50,65 @@ clean_benchmarks <- benchmarks |>
 
 head(clean_benchmarks |> select(benchmark, baseline_category, ai_exceeds_human))
 ```
+
+## 3. Machine Learning: Logistic Regression
+
+We will train a logistic regression model using `glm()` to see if the baseline category can predict the probability that an AI has exceeded human performance (`ai_exceeds_human` = 1).
+
+```{r}
+log_model <- glm(ai_exceeds_human ~ baseline_category, data = clean_benchmarks, family = "binomial")
+
+summary(log_model)$coefficients
+```
+
+While the sample size of major industry benchmarks is relatively small, this model structure allows us to mathematically examine the odds of AI saturation based purely on the rigor of the human competition.
+
+## 4. Data Wrangling for Visualization
+
+Next, we extract the predicted probabilities from our model to visualize exactly how the baseline type affects the perception of AI supremacy. We will do this by generating predictions for each unique baseline category and using the type "response" to get probabilities.
+
+```{r}
+category_preds <- clean_benchmarks |> 
+  distinct(baseline_category) |>
+  mutate(
+    predicted_prob = predict(
+      log_model,
+      newdata = pick(baseline_category),
+      type = "response"
+    )
+  )
+```
+
+## 5. Visualization
+
+We will use `ggplot2` to plot these predicted probabilities:
+
+```{r}
+#| label: fig-baseline-prob
+#| fig-cap: "Predicted probability of an AI model exceeding the human baseline, categorized by the rigor of the human evaluation."
+#| warning: false
+
+ggplot(category_preds, aes(x = reorder(baseline_category, predicted_prob), y = predicted_prob, fill = baseline_category)) +
+  geom_col(alpha = 0.85, width = 0.6) +
+  coord_flip() +
+  scale_y_continuous(labels = scales::percent_format(), limits = c(0, 1)) +
+  scale_fill_brewer(palette = "Set2") +
+  labs(
+    title = "Probability of AI Surpassing Human Performance",
+    subtitle = "Stratified by the rigor of the human baseline definition",
+    x = "Human Baseline Type",
+    y = "Predicted Probability of AI Exceeding Baseline"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(face = "bold", size = 14),
+    panel.grid.minor = element_blank()
+  )
+
+```
+
+## Conclusion
+
+This analysis reveals exactly why generalized "superhuman AI" claims require careful scrutiny. When evaluating benchmark saturation, the probability of an AI clearing the threshold behaves very differently depending on whether it is competing against subject-matter experts or unspecialized crowdworkers. As data professionals, understanding these underlying evaluation mechanics—and verifying the actual datasets behind the headlines—is essential before accepting high-level marketing claims!
+

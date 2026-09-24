@@ -332,6 +332,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#imports" id="toc-imports" class="nav-link" data-scroll-target="#imports">Imports</a></li>
   <li><a href="#data-source-pre-processing" id="toc-data-source-pre-processing" class="nav-link" data-scroll-target="#data-source-pre-processing">1.Data Source &amp; Pre-processing</a></li>
   <li><a href="#feature-engineering" id="toc-feature-engineering" class="nav-link" data-scroll-target="#feature-engineering">2. Feature Engineering</a></li>
+  <li><a href="#machine-learning-logistic-regression" id="toc-machine-learning-logistic-regression" class="nav-link" data-scroll-target="#machine-learning-logistic-regression">3. Machine Learning: Logistic Regression</a></li>
+  <li><a href="#data-wrangling-for-visualization" id="toc-data-wrangling-for-visualization" class="nav-link" data-scroll-target="#data-wrangling-for-visualization">4. Data Wrangling for Visualization</a></li>
+  <li><a href="#visualization" id="toc-visualization" class="nav-link" data-scroll-target="#visualization">5. Visualization</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
   </ul>
 </nav>
     </div>
@@ -378,8 +382,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
-<p>When a tech company announces their newest AI model has achieved “superhuman” status, the claim sounds definitive. But diving into the actual dataset can reveal what is lacking in the measurement: the “human baseline” being beaten is almost never a constant. Sometimes the benchmark tests a PhD expert in a specific field, other times it uses an unspecialized crowdworker, and occasionally, it relies on an estimate that nobody ever formally tested.</p>
-<p>In this post, we shift from analyzing individual reasoning tasks to performing a meta-analysis on the benchmarks themselves. Using logistic regression in R, we will explore whether the <em>type</em> of human baseline (e.g., expert vs.&nbsp;crowdworker) statistically impacts the likelihood of an AI model officially surpassing it.</p>
+<p>The rapid pace of AI development is undeniable, with frontier models increasingly outpacing the very evaluations designed to measure them. But as these systems achieve “superhuman” status across various tasks, validating those milestones presents a unique data science challenge: the “human baseline” they are beating is almost never a constant. Depending on the test, a model might be measured against a PhD expert, an unspecialized crowdworker, or even an estimate that was never formally tested.</p>
+<p>In this post, I want to shift from analyzing individual reasoning tasks to performing a meta-analysis on the benchmarks themselves. Using logistic regression in R, we will explore whether the type of human baseline (e.g., expert vs.&nbsp;crowdworker) statistically impacts the likelihood of an AI model officially surpassing it.</p>
 </section>
 <section id="imports" class="level2">
 <h2 class="anchored" data-anchor-id="imports">Imports</h2>
@@ -443,6 +447,76 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 6 Bongard-LOGO    Expert Baseline                     0</code></pre>
 </div>
 </div>
+</section>
+<section id="machine-learning-logistic-regression" class="level2">
+<h2 class="anchored" data-anchor-id="machine-learning-logistic-regression">3. Machine Learning: Logistic Regression</h2>
+<p>We will train a logistic regression model using <code>glm()</code> to see if the baseline category can predict the probability that an AI has exceeded human performance (<code>ai_exceeds_human</code> = 1).</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>log_model <span class="ot">&lt;-</span> <span class="fu">glm</span>(ai_exceeds_human <span class="sc">~</span> baseline_category, <span class="at">data =</span> clean_benchmarks, <span class="at">family =</span> <span class="st">"binomial"</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(log_model)<span class="sc">$</span>coefficients</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                                   Estimate Std. Error    z value  Pr(&gt;|z|)
+(Intercept)                       0.1823216  0.6055279  0.3010952 0.7633419
+baseline_categoryEstimated/Other -0.1823216  1.1690441 -0.1559578 0.8760663
+baseline_categoryExpert Baseline -0.1823216  0.8755936 -0.2082262 0.8350523</code></pre>
+</div>
+</div>
+<p>While the sample size of major industry benchmarks is relatively small, this model structure allows us to mathematically examine the odds of AI saturation based purely on the rigor of the human competition.</p>
+</section>
+<section id="data-wrangling-for-visualization" class="level2">
+<h2 class="anchored" data-anchor-id="data-wrangling-for-visualization">4. Data Wrangling for Visualization</h2>
+<p>Next, we extract the predicted probabilities from our model to visualize exactly how the baseline type affects the perception of AI supremacy. We will do this by generating predictions for each unique baseline category and using the type “response” to get probabilities.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>category_preds <span class="ot">&lt;-</span> clean_benchmarks <span class="sc">|&gt;</span> </span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(baseline_category) <span class="sc">|&gt;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">predicted_prob =</span> <span class="fu">predict</span>(</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>      log_model,</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>      <span class="at">newdata =</span> <span class="fu">pick</span>(baseline_category),</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>      <span class="at">type =</span> <span class="st">"response"</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="visualization" class="level2">
+<h2 class="anchored" data-anchor-id="visualization">5. Visualization</h2>
+<p>We will use <code>ggplot2</code> to plot these predicted probabilities:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(category_preds, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(baseline_category, predicted_prob), <span class="at">y =</span> predicted_prob, <span class="at">fill =</span> baseline_category)) <span class="sc">+</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">alpha =</span> <span class="fl">0.85</span>, <span class="at">width =</span> <span class="fl">0.6</span>) <span class="sc">+</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_flip</span>() <span class="sc">+</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">percent_format</span>(), <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">"Set2"</span>) <span class="sc">+</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Probability of AI Surpassing Human Performance"</span>,</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Stratified by the rigor of the human baseline definition"</span>,</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Human Baseline Type"</span>,</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Predicted Probability of AI Exceeding Baseline"</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="st">"none"</span>,</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>, <span class="at">size =</span> <span class="dv">14</span>),</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">panel.grid.minor =</span> <span class="fu">element_blank</span>()</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div id="fig-baseline-prob" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-baseline-prob-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="index_files/figure-html/fig-baseline-prob-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-baseline-prob-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Predicted probability of an AI model exceeding the human baseline, categorized by the rigor of the human evaluation.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>This analysis reveals exactly why generalized “superhuman AI” claims require careful scrutiny. When evaluating benchmark saturation, the probability of an AI clearing the threshold behaves very differently depending on whether it is competing against subject-matter experts or unspecialized crowdworkers. As data professionals, understanding these underlying evaluation mechanics—and verifying the actual datasets behind the headlines—is essential before accepting high-level marketing claims!</p>
 
 
 </section>

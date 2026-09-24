@@ -25,7 +25,7 @@
     "href": "posts/ai-performance-pred-r/index.html#introduction",
     "title": "Predicting Superhuman AI Performance by Task Category",
     "section": "Introduction",
-    "text": "Introduction\nWhen a tech company announces their newest AI model has achieved “superhuman” status, the claim sounds definitive. But diving into the actual dataset can reveal what is lacking in the measurement: the “human baseline” being beaten is almost never a constant. Sometimes the benchmark tests a PhD expert in a specific field, other times it uses an unspecialized crowdworker, and occasionally, it relies on an estimate that nobody ever formally tested.\nIn this post, we shift from analyzing individual reasoning tasks to performing a meta-analysis on the benchmarks themselves. Using logistic regression in R, we will explore whether the type of human baseline (e.g., expert vs. crowdworker) statistically impacts the likelihood of an AI model officially surpassing it."
+    "text": "Introduction\nThe rapid pace of AI development is undeniable, with frontier models increasingly outpacing the very evaluations designed to measure them. But as these systems achieve “superhuman” status across various tasks, validating those milestones presents a unique data science challenge: the “human baseline” they are beating is almost never a constant. Depending on the test, a model might be measured against a PhD expert, an unspecialized crowdworker, or even an estimate that was never formally tested.\nIn this post, I want to shift from analyzing individual reasoning tasks to performing a meta-analysis on the benchmarks themselves. Using logistic regression in R, we will explore whether the type of human baseline (e.g., expert vs. crowdworker) statistically impacts the likelihood of an AI model officially surpassing it."
   },
   {
     "objectID": "posts/ai-performance-pred-r/index.html#imports",
@@ -47,6 +47,34 @@
     "title": "Predicting Superhuman AI Performance by Task Category",
     "section": "2. Feature Engineering",
     "text": "2. Feature Engineering\nTo build our model, we need to filter out benchmarks that lack a measured baseline (where ai_exceeds_human is missing). We will also group the granular human_baseline_type into broader categories so our model has sufficient data per group.\n\nclean_benchmarks &lt;- benchmarks |&gt;\n  filter(!is.na(ai_exceeds_human), !is.na(human_baseline_type)) |&gt;\n  mutate(\n    baseline_category = case_when(\n      grepl(\"expert\", human_baseline_type) ~ \"Expert Baseline\",\n      grepl(\"crowd|annotator\", human_baseline_type) ~ \"Crowdworker Baseline\",\n      TRUE ~ \"Estimated/Other\"\n    ),\n    baseline_category = as.factor(baseline_category)\n  )\n\nhead(clean_benchmarks |&gt; select(benchmark, baseline_category, ai_exceeds_human))\n\n# A tibble: 6 × 3\n  benchmark       baseline_category    ai_exceeds_human\n  &lt;chr&gt;           &lt;fct&gt;                           &lt;dbl&gt;\n1 ARC-AGI-1       Crowdworker Baseline                1\n2 ARC-AGI-2       Crowdworker Baseline                0\n3 ARC-AGI-3       Crowdworker Baseline                0\n4 ConceptARC      Crowdworker Baseline                1\n5 RAVEN / I-RAVEN Crowdworker Baseline                1\n6 Bongard-LOGO    Expert Baseline                     0"
+  },
+  {
+    "objectID": "posts/ai-performance-pred-r/index.html#machine-learning-logistic-regression",
+    "href": "posts/ai-performance-pred-r/index.html#machine-learning-logistic-regression",
+    "title": "Predicting Superhuman AI Performance by Task Category",
+    "section": "3. Machine Learning: Logistic Regression",
+    "text": "3. Machine Learning: Logistic Regression\nWe will train a logistic regression model using glm() to see if the baseline category can predict the probability that an AI has exceeded human performance (ai_exceeds_human = 1).\n\nlog_model &lt;- glm(ai_exceeds_human ~ baseline_category, data = clean_benchmarks, family = \"binomial\")\n\nsummary(log_model)$coefficients\n\n                                   Estimate Std. Error    z value  Pr(&gt;|z|)\n(Intercept)                       0.1823216  0.6055279  0.3010952 0.7633419\nbaseline_categoryEstimated/Other -0.1823216  1.1690441 -0.1559578 0.8760663\nbaseline_categoryExpert Baseline -0.1823216  0.8755936 -0.2082262 0.8350523\n\n\nWhile the sample size of major industry benchmarks is relatively small, this model structure allows us to mathematically examine the odds of AI saturation based purely on the rigor of the human competition."
+  },
+  {
+    "objectID": "posts/ai-performance-pred-r/index.html#data-wrangling-for-visualization",
+    "href": "posts/ai-performance-pred-r/index.html#data-wrangling-for-visualization",
+    "title": "Predicting Superhuman AI Performance by Task Category",
+    "section": "4. Data Wrangling for Visualization",
+    "text": "4. Data Wrangling for Visualization\nNext, we extract the predicted probabilities from our model to visualize exactly how the baseline type affects the perception of AI supremacy. We will do this by generating predictions for each unique baseline category and using the type “response” to get probabilities.\n\ncategory_preds &lt;- clean_benchmarks |&gt; \n  distinct(baseline_category) |&gt;\n  mutate(\n    predicted_prob = predict(\n      log_model,\n      newdata = pick(baseline_category),\n      type = \"response\"\n    )\n  )"
+  },
+  {
+    "objectID": "posts/ai-performance-pred-r/index.html#visualization",
+    "href": "posts/ai-performance-pred-r/index.html#visualization",
+    "title": "Predicting Superhuman AI Performance by Task Category",
+    "section": "5. Visualization",
+    "text": "5. Visualization\nWe will use ggplot2 to plot these predicted probabilities:\n\nggplot(category_preds, aes(x = reorder(baseline_category, predicted_prob), y = predicted_prob, fill = baseline_category)) +\n  geom_col(alpha = 0.85, width = 0.6) +\n  coord_flip() +\n  scale_y_continuous(labels = scales::percent_format(), limits = c(0, 1)) +\n  scale_fill_brewer(palette = \"Set2\") +\n  labs(\n    title = \"Probability of AI Surpassing Human Performance\",\n    subtitle = \"Stratified by the rigor of the human baseline definition\",\n    x = \"Human Baseline Type\",\n    y = \"Predicted Probability of AI Exceeding Baseline\"\n  ) +\n  theme_minimal() +\n  theme(\n    legend.position = \"none\",\n    plot.title = element_text(face = \"bold\", size = 14),\n    panel.grid.minor = element_blank()\n  )\n\n\n\n\n\n\n\nFigure 1: Predicted probability of an AI model exceeding the human baseline, categorized by the rigor of the human evaluation."
+  },
+  {
+    "objectID": "posts/ai-performance-pred-r/index.html#conclusion",
+    "href": "posts/ai-performance-pred-r/index.html#conclusion",
+    "title": "Predicting Superhuman AI Performance by Task Category",
+    "section": "Conclusion",
+    "text": "Conclusion\nThis analysis reveals exactly why generalized “superhuman AI” claims require careful scrutiny. When evaluating benchmark saturation, the probability of an AI clearing the threshold behaves very differently depending on whether it is competing against subject-matter experts or unspecialized crowdworkers. As data professionals, understanding these underlying evaluation mechanics—and verifying the actual datasets behind the headlines—is essential before accepting high-level marketing claims!"
   },
   {
     "objectID": "posts/performance-gap-python/index.html",
