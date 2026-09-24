@@ -4,7 +4,7 @@
     "href": "blog.html",
     "title": "Blog",
     "section": "",
-    "text": "The Abstract Reasoning Gap: Human vs. Machine\n\n\n\n\n\n\nAudrey Tsung\n\n\nSep 24, 2026\n\n\n\n\n\n\n\n\n\n\n\n\n\nPredicting Superhuman AI Performance by Task Category\n\n\n\n\n\n\nAudrey Tsung\n\n\nSep 24, 2026\n\n\n\n\n\n\n\n\n\n\n\nWeek 1 of MDS\n\n\n\n\n\n\nAudrey Tsung\n\n\nSep 9, 2026\n\n\n\n\n\n\nNo matching items"
+    "text": "The Abstract Reasoning Gap: Human vs. Machine\n\n\n\n\n\n\nAudrey Tsung\n\n\nSep 24, 2026\n\n\n\n\n\n\n\n\n\n\n\n\n\nThe Speed of Saturation: Tracking AI Benchmark Lifespans\n\n\n\n\n\n\nAudrey Tsung\n\n\nSep 24, 2026\n\n\n\n\n\n\n\n\n\n\n\nWeek 1 of MDS\n\n\n\n\n\n\nAudrey Tsung\n\n\nSep 9, 2026\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "index.html",
@@ -14,67 +14,11 @@
     "text": "Hi, my name is Audrey and I am from Vancouver, BC. I completed a BSc in Computer Science with a minor in Data Science at UBC, where I developed a strong interest in AI/ML systems evaluation and large-scale data workflows. This interest ultimately led me to pursue the Master of Data Science program. This website documents my experiences, learning journey, and personal growth throughout the MDS program."
   },
   {
-    "objectID": "posts/ai-performance-pred-r/index.html",
-    "href": "posts/ai-performance-pred-r/index.html",
-    "title": "Predicting Superhuman AI Performance by Task Category",
+    "objectID": "posts/first-weeks/index.html",
+    "href": "posts/first-weeks/index.html",
+    "title": "Week 1 of MDS",
     "section": "",
-    "text": "Google DeepMind / Unsplash"
-  },
-  {
-    "objectID": "posts/ai-performance-pred-r/index.html#introduction",
-    "href": "posts/ai-performance-pred-r/index.html#introduction",
-    "title": "Predicting Superhuman AI Performance by Task Category",
-    "section": "Introduction",
-    "text": "Introduction\nThe rapid pace of AI development is undeniable, with frontier models increasingly outpacing the very evaluations designed to measure them. But as these systems achieve “superhuman” status across various tasks, validating those milestones presents a unique data science challenge: the “human baseline” they are beating is almost never a constant. Depending on the test, a model might be measured against a PhD expert, an unspecialized crowdworker, or even an estimate that was never formally tested.\nIn this post, I want to shift from analyzing individual reasoning tasks to performing a meta-analysis on the benchmarks themselves. Using logistic regression in R, we will explore whether the type of human baseline (e.g., expert vs. crowdworker) statistically impacts the likelihood of an AI model officially surpassing it."
-  },
-  {
-    "objectID": "posts/ai-performance-pred-r/index.html#imports",
-    "href": "posts/ai-performance-pred-r/index.html#imports",
-    "title": "Predicting Superhuman AI Performance by Task Category",
-    "section": "Imports",
-    "text": "Imports\n\nlibrary(readr)\nlibrary(dplyr)\nlibrary(ggplot2)"
-  },
-  {
-    "objectID": "posts/ai-performance-pred-r/index.html#data-source-pre-processing",
-    "href": "posts/ai-performance-pred-r/index.html#data-source-pre-processing",
-    "title": "Predicting Superhuman AI Performance by Task Category",
-    "section": "1.Data Source & Pre-processing",
-    "text": "1.Data Source & Pre-processing\nThis analysis investigates the cognitive domains where AI exceeds human capabilities using the AI Benchmarks vs Human Baselines Kaggle dataset.\n\nbenchmarks &lt;- read_csv(\"data/benchmarks.csv\", show_col_types = FALSE)\nhead(benchmarks)\n\n# A tibble: 6 × 25\n  benchmark  short_name release_year creator_org n_items modality reasoning_type\n  &lt;chr&gt;      &lt;chr&gt;             &lt;dbl&gt; &lt;chr&gt;         &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt;         \n1 ARC-AGI-1  ARC-AGI-1          2019 Francois C…    1000 visual_… abstract_indu…\n2 ARC-AGI-2  ARC-AGI-2          2025 ARC Prize …    1240 visual_… abstract_indu…\n3 ARC-AGI-3  ARC-AGI-3          2026 ARC Prize …      NA interac… abstract_indu…\n4 ConceptARC ConceptARC         2023 Santa Fe I…     160 visual_… conceptual_an…\n5 RAVEN / I… RAVEN              2019 UCLA (Zhan…   70000 visual   analogical    \n6 Bongard-L… Bongard-L…         2020 NVIDIA (Ni…   12000 visual   concept_induc…\n# ℹ 18 more variables: metric_unit &lt;chr&gt;, human_baseline_exists &lt;dbl&gt;,\n#   human_baseline_pct &lt;dbl&gt;, human_baseline_type &lt;chr&gt;,\n#   human_baseline_n &lt;dbl&gt;, human_baseline_note &lt;chr&gt;,\n#   best_ai_at_release_pct &lt;dbl&gt;, best_ai_at_release_system &lt;chr&gt;,\n#   best_ai_at_release_year &lt;dbl&gt;, best_ai_latest_pct &lt;dbl&gt;,\n#   best_ai_latest_system &lt;chr&gt;, best_ai_latest_asof &lt;chr&gt;,\n#   ai_exceeds_human &lt;dbl&gt;, saturation_status &lt;chr&gt;, benchmark_license &lt;chr&gt;, …"
-  },
-  {
-    "objectID": "posts/ai-performance-pred-r/index.html#feature-engineering",
-    "href": "posts/ai-performance-pred-r/index.html#feature-engineering",
-    "title": "Predicting Superhuman AI Performance by Task Category",
-    "section": "2. Feature Engineering",
-    "text": "2. Feature Engineering\nTo build our model, we need to filter out benchmarks that lack a measured baseline (where ai_exceeds_human is missing). We will also group the granular human_baseline_type into broader categories so our model has sufficient data per group.\n\nclean_benchmarks &lt;- benchmarks |&gt;\n  filter(!is.na(ai_exceeds_human), !is.na(human_baseline_type)) |&gt;\n  mutate(\n    baseline_category = case_when(\n      grepl(\"expert\", human_baseline_type) ~ \"Expert Baseline\",\n      grepl(\"crowd|annotator\", human_baseline_type) ~ \"Crowdworker Baseline\",\n      TRUE ~ \"Estimated/Other\"\n    ),\n    baseline_category = as.factor(baseline_category)\n  )\n\nhead(clean_benchmarks |&gt; select(benchmark, baseline_category, ai_exceeds_human))\n\n# A tibble: 6 × 3\n  benchmark       baseline_category    ai_exceeds_human\n  &lt;chr&gt;           &lt;fct&gt;                           &lt;dbl&gt;\n1 ARC-AGI-1       Crowdworker Baseline                1\n2 ARC-AGI-2       Crowdworker Baseline                0\n3 ARC-AGI-3       Crowdworker Baseline                0\n4 ConceptARC      Crowdworker Baseline                1\n5 RAVEN / I-RAVEN Crowdworker Baseline                1\n6 Bongard-LOGO    Expert Baseline                     0"
-  },
-  {
-    "objectID": "posts/ai-performance-pred-r/index.html#machine-learning-logistic-regression",
-    "href": "posts/ai-performance-pred-r/index.html#machine-learning-logistic-regression",
-    "title": "Predicting Superhuman AI Performance by Task Category",
-    "section": "3. Machine Learning: Logistic Regression",
-    "text": "3. Machine Learning: Logistic Regression\nWe will train a logistic regression model using glm() to see if the baseline category can predict the probability that an AI has exceeded human performance (ai_exceeds_human = 1).\n\nlog_model &lt;- glm(ai_exceeds_human ~ baseline_category, data = clean_benchmarks, family = \"binomial\")\n\nsummary(log_model)$coefficients\n\n                                   Estimate Std. Error    z value  Pr(&gt;|z|)\n(Intercept)                       0.1823216  0.6055279  0.3010952 0.7633419\nbaseline_categoryEstimated/Other -0.1823216  1.1690441 -0.1559578 0.8760663\nbaseline_categoryExpert Baseline -0.1823216  0.8755936 -0.2082262 0.8350523\n\n\nWhile the sample size of major industry benchmarks is relatively small, this model structure allows us to mathematically examine the odds of AI saturation based purely on the rigor of the human competition."
-  },
-  {
-    "objectID": "posts/ai-performance-pred-r/index.html#data-wrangling-for-visualization",
-    "href": "posts/ai-performance-pred-r/index.html#data-wrangling-for-visualization",
-    "title": "Predicting Superhuman AI Performance by Task Category",
-    "section": "4. Data Wrangling for Visualization",
-    "text": "4. Data Wrangling for Visualization\nNext, we extract the predicted probabilities from our model to visualize exactly how the baseline type affects the perception of AI supremacy. We will do this by generating predictions for each unique baseline category and using the type “response” to get probabilities.\n\ncategory_preds &lt;- clean_benchmarks |&gt; \n  distinct(baseline_category) |&gt;\n  mutate(\n    predicted_prob = predict(\n      log_model,\n      newdata = pick(baseline_category),\n      type = \"response\"\n    )\n  )"
-  },
-  {
-    "objectID": "posts/ai-performance-pred-r/index.html#visualization",
-    "href": "posts/ai-performance-pred-r/index.html#visualization",
-    "title": "Predicting Superhuman AI Performance by Task Category",
-    "section": "5. Visualization",
-    "text": "5. Visualization\nWe will use ggplot2 to plot these predicted probabilities:\n\nggplot(category_preds, aes(x = reorder(baseline_category, predicted_prob), y = predicted_prob, fill = baseline_category)) +\n  geom_col(alpha = 0.85, width = 0.6) +\n  coord_flip() +\n  scale_y_continuous(labels = scales::percent_format(), limits = c(0, 1)) +\n  scale_fill_brewer(palette = \"Set2\") +\n  labs(\n    title = \"Probability of AI Surpassing Human Performance\",\n    subtitle = \"Stratified by the rigor of the human baseline definition\",\n    x = \"Human Baseline Type\",\n    y = \"Predicted Probability of AI Exceeding Baseline\"\n  ) +\n  theme_minimal() +\n  theme(\n    legend.position = \"none\",\n    plot.title = element_text(face = \"bold\", size = 14),\n    panel.grid.minor = element_blank()\n  )\n\n\n\n\n\n\n\nFigure 1: Predicted probability of an AI model exceeding the human baseline, categorized by the rigor of the human evaluation."
-  },
-  {
-    "objectID": "posts/ai-performance-pred-r/index.html#conclusion",
-    "href": "posts/ai-performance-pred-r/index.html#conclusion",
-    "title": "Predicting Superhuman AI Performance by Task Category",
-    "section": "Conclusion",
-    "text": "Conclusion\nThis analysis reveals exactly why generalized “superhuman AI” claims require careful scrutiny. When evaluating benchmark saturation, the probability of an AI clearing the threshold behaves very differently depending on whether it is competing against subject-matter experts or unspecialized crowdworkers. As data professionals, understanding these underlying evaluation mechanics—and verifying the actual datasets behind the headlines—is essential before accepting high-level marketing claims!"
+    "text": "Starting the MDS Chapter (art by @amelicart on ig)\n\n\nI officially started off my Master of Data Science program this month, and honestly, it feels so nice to be back on the UBC campus! I won’t lie, getting used to the rigorous new schedule and the daily commute has been a bit of an adjustment, but the silver lining is that the drive has given me the perfect excuse to finally get lost in a new sci-fi audiobook. I’ve been listening to Leviathan Wakes by James S. A. Corey (a recommendation from my boyfriend) and I am absolutely loving it so far. It has actually turned into a surprisingly relaxing buffer between home and school.\nBeyond the early mornings and the traffic, the start of the semester has been an absolute blast. Orientation week was very fun, and I’ve already met so many amazing new friends in my cohort. Since this program is fast-paced, it has been so wonderful having a solid group of people to study with, hangout with in between lectures, and just navigate this whole graduate school experience together.\nThen comes the coursework. With my background in computer science and data science, I was expecting the first week to be a bit of a review, but the assignments and lectures have still been quite enjoyable. All of the professors are incredibly knowledgeable, super nice, and genuinely passionate about their subjects. One professor even gives out sweet treats during lectures! It’s definitely a busy season of transition, but I am so excited for everything this program has in store!"
   },
   {
     "objectID": "posts/performance-gap-python/index.html",
@@ -140,11 +84,32 @@
     "text": "Discussion\nLooking at the plot, human testers clearly maintain the edge across all abstract reasoning categories today, with every single point resting safely below the parity line. However, the tight cluster of blue dots near the top right—where machine success rates approach 90% and the performance gap narrows significantly—shows how recent advancements are beginning to blur that line. While models still experience structural reasoning faults on certain tasks (seen in the deep red outliers), they are undeniably closing in on human intuition in other domains. As architectures continue to evolve, it leaves an open question: are these remaining red gaps a fundamental limit of how machines process abstraction, or simply the final hurdles before true parity is reached?"
   },
   {
-    "objectID": "posts/first-weeks/index.html",
-    "href": "posts/first-weeks/index.html",
-    "title": "Week 1 of MDS",
+    "objectID": "posts/ai-benchmark-lifespan-r/index.html",
+    "href": "posts/ai-benchmark-lifespan-r/index.html",
+    "title": "The Speed of Saturation: Tracking AI Benchmark Lifespans",
     "section": "",
-    "text": "Starting the MDS Chapter (art by @amelicart on ig)\n\n\nI officially started off my Master of Data Science program this month, and honestly, it feels so nice to be back on the UBC campus! I won’t lie, getting used to the rigorous new schedule and the daily commute has been a bit of an adjustment, but the silver lining is that the drive has given me the perfect excuse to finally get lost in a new sci-fi audiobook. I’ve been listening to Leviathan Wakes by James S. A. Corey (a recommendation from my boyfriend) and I am absolutely loving it so far. It has actually turned into a surprisingly relaxing buffer between home and school.\nBeyond the early mornings and the traffic, the start of the semester has been an absolute blast. Orientation week was very fun, and I’ve already met so many amazing new friends in my cohort. Since this program is fast-paced, it has been so wonderful having a solid group of people to study with, hangout with in between lectures, and just navigate this whole graduate school experience together.\nThen comes the coursework. With my background in computer science and data science, I was expecting the first week to be a bit of a review, but the assignments and lectures have still been quite enjoyable. All of the professors are incredibly knowledgeable, super nice, and genuinely passionate about their subjects. One professor even gives out sweet treats during lectures! It’s definitely a busy season of transition, but I am so excited for everything this program has in store!"
+    "text": "Google DeepMind / Unsplash"
+  },
+  {
+    "objectID": "posts/ai-benchmark-lifespan-r/index.html#introduction",
+    "href": "posts/ai-benchmark-lifespan-r/index.html#introduction",
+    "title": "The Speed of Saturation: Tracking AI Benchmark Lifespans",
+    "section": "Introduction",
+    "text": "Introduction\nAs new language models and agentic systems are released, the evaluation benchmarks designed to test them are being solved at an unprecedented rate. Rather than asking if a model can beat a specific test, the more relevant question in evaluating AI progress is how fast that test becomes obsolete.\nIn this post, we step back to look at the lifecycle of 36 major cognitive benchmarks. By analyzing the gap between the best AI score on the day a benchmark was published and the current state-of-the-art score, we can visualize the velocity of machine learning advancements and identify which domains are resisting saturation."
+  },
+  {
+    "objectID": "posts/ai-benchmark-lifespan-r/index.html#imports",
+    "href": "posts/ai-benchmark-lifespan-r/index.html#imports",
+    "title": "The Speed of Saturation: Tracking AI Benchmark Lifespans",
+    "section": "Imports",
+    "text": "Imports\n\nlibrary(readr)\nlibrary(dplyr)\nlibrary(ggplot2)"
+  },
+  {
+    "objectID": "posts/ai-benchmark-lifespan-r/index.html#data-source-pre-processing",
+    "href": "posts/ai-benchmark-lifespan-r/index.html#data-source-pre-processing",
+    "title": "The Speed of Saturation: Tracking AI Benchmark Lifespans",
+    "section": "1.Data Source & Pre-processing",
+    "text": "1.Data Source & Pre-processing\nThis analysis investigates the cognitive domains where AI exceeds human capabilities using the AI Benchmarks vs Human Baselines Kaggle dataset.\n\nbenchmarks &lt;- read_csv(\"data/benchmarks.csv\", show_col_types = FALSE)\nhead(benchmarks)\n\n# A tibble: 6 × 25\n  benchmark  short_name release_year creator_org n_items modality reasoning_type\n  &lt;chr&gt;      &lt;chr&gt;             &lt;dbl&gt; &lt;chr&gt;         &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt;         \n1 ARC-AGI-1  ARC-AGI-1          2019 Francois C…    1000 visual_… abstract_indu…\n2 ARC-AGI-2  ARC-AGI-2          2025 ARC Prize …    1240 visual_… abstract_indu…\n3 ARC-AGI-3  ARC-AGI-3          2026 ARC Prize …      NA interac… abstract_indu…\n4 ConceptARC ConceptARC         2023 Santa Fe I…     160 visual_… conceptual_an…\n5 RAVEN / I… RAVEN              2019 UCLA (Zhan…   70000 visual   analogical    \n6 Bongard-L… Bongard-L…         2020 NVIDIA (Ni…   12000 visual   concept_induc…\n# ℹ 18 more variables: metric_unit &lt;chr&gt;, human_baseline_exists &lt;dbl&gt;,\n#   human_baseline_pct &lt;dbl&gt;, human_baseline_type &lt;chr&gt;,\n#   human_baseline_n &lt;dbl&gt;, human_baseline_note &lt;chr&gt;,\n#   best_ai_at_release_pct &lt;dbl&gt;, best_ai_at_release_system &lt;chr&gt;,\n#   best_ai_at_release_year &lt;dbl&gt;, best_ai_latest_pct &lt;dbl&gt;,\n#   best_ai_latest_system &lt;chr&gt;, best_ai_latest_asof &lt;chr&gt;,\n#   ai_exceeds_human &lt;dbl&gt;, saturation_status &lt;chr&gt;, benchmark_license &lt;chr&gt;, …"
   },
   {
     "objectID": "about.html",

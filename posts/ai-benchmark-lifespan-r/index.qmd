@@ -1,0 +1,35 @@
+---
+title: "The Speed of Saturation: Tracking AI Benchmark Lifespans"
+author: "Audrey Tsung"
+date: "2026-09-24"
+image: "../../images/google-deepmind2.jpg"
+---
+
+![Google DeepMind / Unsplash ](../../images/google-deepmind2.jpg){width=250, fig-align="left"}
+
+## Introduction
+
+As new language models and agentic systems are released, the evaluation benchmarks designed to test them are being solved at an unprecedented rate. Rather than asking *if* a model can beat a specific test, the more relevant question in evaluating AI progress is *how fast* that test becomes obsolete. 
+
+In this post, we step back to look at the lifecycle of 36 major cognitive benchmarks. By analyzing the gap between the best AI score on the day a benchmark was published and the current state-of-the-art score, we can visualize the velocity of machine learning advancements and identify which domains are resisting saturation.
+
+
+## Imports
+```{r}
+#| message: false
+#| warning: false
+library(readr)
+library(dplyr)
+library(ggplot2)
+```
+
+
+## 1.Data Source & Pre-processing
+
+This analysis investigates the cognitive domains where AI exceeds human capabilities using the [AI Benchmarks vs Human Baselines](https://www.kaggle.com/datasets/kylefengkfeng209/ai-benchmarks-vs-human-baselines) Kaggle dataset.
+
+
+```{r}
+benchmarks <- read_csv("data/benchmarks.csv", show_col_types = FALSE)
+head(benchmarks)
+```
