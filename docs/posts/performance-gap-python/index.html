@@ -119,6 +119,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -336,6 +365,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#data-source-pre-processing" id="toc-data-source-pre-processing" class="nav-link" data-scroll-target="#data-source-pre-processing">1. Data Source &amp; Pre-processing</a></li>
   <li><a href="#feature-engineering" id="toc-feature-engineering" class="nav-link" data-scroll-target="#feature-engineering">2. Feature Engineering</a></li>
   <li><a href="#machine-learning-decision-tree-classifier" id="toc-machine-learning-decision-tree-classifier" class="nav-link" data-scroll-target="#machine-learning-decision-tree-classifier">3. Machine Learning: Decision Tree Classifier</a></li>
+  <li><a href="#data-wrangling-for-visualization" id="toc-data-wrangling-for-visualization" class="nav-link" data-scroll-target="#data-wrangling-for-visualization">4. Data Wrangling for Visualization</a></li>
+  <li><a href="#interactive-altair-visualization" id="toc-interactive-altair-visualization" class="nav-link" data-scroll-target="#interactive-altair-visualization">5. Interactive Altair Visualization</a></li>
+  <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion">Discussion</a></li>
   </ul>
 </nav>
     </div>
@@ -376,14 +408,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
-<p>Recent headlines about autonomous AI agents executing real-world cyber breaches make it easy to feel like agentic ai is something within reach. It can feel really daunting without any understanding of the underlying capabilities and limitations. That tension between alarming headlines and actual benchmark rigor is why I chose this dataset. As the race for agentic AI intensifies, it’s crucial to separate the signal from the noise.</p>
-<p>Whenever a lab claims a model has “surpassed human performance,” my immediate reaction is skepticism: <em>Which humans, and evaluated under what conditions?</em></p>
-<p>While marketing hype treats the “human baseline” as a monolithic gold standard, the reality ranges from IMO gold medalists to crowdworkers who gave up on 70% of the problems.</p>
-<p>My goal for this post is to dig into item-level ConceptARC data, benchmarking 482 human testers against machine solvers on the exact same abstract reasoning tasks. A decision tree might seem simplistic compared to modern large language models, but training one across 16 cognitive concepts cuts through the noise. It lets us map exactly where the “superhuman” narrative holds up, and where human intuition still wins.</p>
+<p>It is easy to read recent headlines about AI agents executing real-world cyber breaches and assume superhuman, agentic AI is already here. But whenever a lab claims their newest model has “surpassed human performance,” there should be a clear definition of <em>Which</em> humans, and evaluated under <em>what</em> conditions?</p>
+<p>While marketing hype treats the “human baseline” as a monolithic gold standard, the reality ranges wildly—from three-time IMO gold medalists to unspecialized crowdworkers who gave up on 70% of the problems. That tension between alarming headlines and actual benchmark rigor is exactly why I chose this dataset.</p>
+<p>My goal for this post is to dig into item-level ConceptARC data, benchmarking 482 human testers directly against machine solvers on the exact same abstract reasoning tasks. A decision tree might seem mathematically naive compared to a massive language model, but training one across 16 core cognitive concepts cuts through the noise. It allows us to map exactly where the “superhuman” narrative is real, and where human intuition still thoroughly outpaces the machines.</p>
 </section>
 <section id="imports" class="level2">
 <h2 class="anchored" data-anchor-id="imports">Imports</h2>
-<div id="399354dc" class="cell" data-message="false" data-execution_count="1">
+<div id="c24c9528" class="cell" data-message="false" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> altair <span class="im">as</span> alt</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.tree <span class="im">import</span> DecisionTreeClassifier</span>
@@ -393,8 +424,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="data-source-pre-processing" class="level2">
 <h2 class="anchored" data-anchor-id="data-source-pre-processing">1. Data Source &amp; Pre-processing</h2>
-<p>This analysis utilizes item-level test data from the <a href="https://www.kaggle.com/datasets/kylefengkfeng209/ai-benchmarks-vs-human-baselines">AI Benchmarks vs Human Baselines</a> dataset. We examine <code>conceptarc_human_vs_machine.csv</code>, which records success rates across 528 identical abstract reasoning tasks.</p>
-<div id="ae48d852" class="cell" data-execution_count="2">
+<p>This analysis utilizes item-level test data from the <a href="https://www.kaggle.com/datasets/kylefengkfeng209/ai-benchmarks-vs-human-baselines?utm_source=gemini">AI Benchmarks vs Human Baselines</a> dataset. We will examine <code>conceptarc_human_vs_machine.csv</code>, which records success rates across 528 identical abstract reasoning tasks.</p>
+<div id="22d11742" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the dataset</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>conceptarc <span class="op">=</span> pd.read_csv(<span class="st">"data/conceptarc_human_vs_machine.csv"</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>conceptarc.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -523,8 +554,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="feature-engineering" class="level2">
 <h2 class="anchored" data-anchor-id="feature-engineering">2. Feature Engineering</h2>
-<p>We can calculate the best machine’s exact score by subtracting the gap from the human accuracy. Let’s also create a binary target variable indicating whether at least one machine solver succeeded on the task.</p>
-<div id="2a39795a" class="cell" data-execution_count="3">
+<p>We can calculate the best machine’s exact score by subtracting the performance gap from the human accuracy. We also need to create a binary target variable (<code>machine_passed</code>) indicating whether at least one of the machine solvers succeeded on the task.</p>
+<div id="b1a75ea1" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>conceptarc[<span class="st">'best_machine_accuracy'</span>] <span class="op">=</span> conceptarc[<span class="st">'human_accuracy'</span>] <span class="op">-</span> conceptarc[<span class="st">'human_minus_best_machine'</span>]</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>conceptarc[<span class="st">'machine_passed'</span>] <span class="op">=</span> (conceptarc[<span class="st">'n_machine_solvers_correct'</span>] <span class="op">&gt;</span> <span class="dv">0</span>).astype(<span class="bu">int</span>)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>conceptarc.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -665,8 +696,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="machine-learning-decision-tree-classifier" class="level2">
 <h2 class="anchored" data-anchor-id="machine-learning-decision-tree-classifier">3. Machine Learning: Decision Tree Classifier</h2>
-<p>Now, we will try to predict if a machine solver will succeed based on the concept group and human accuracy using <code>get_dummies</code> to convert the categorical ‘concept_group’ into numeric flags for scikit-learn</p>
-<div id="76de4676" class="cell" data-execution_count="4">
+<p>Can we predict if a machine solver will fail based entirely on how humans performed and the type of concept being tested? We will use <code>get_dummies</code> to convert the categorical <code>concept_group</code> into numeric flags for scikit-learn.</p>
+<div id="ef9ef7f6" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> pd.get_dummies(conceptarc[[<span class="st">'concept_group'</span>, <span class="st">'human_accuracy'</span>]], drop_first<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> conceptarc[<span class="st">'machine_passed'</span>]</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -680,6 +711,123 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code>Decision Tree Prediction Accuracy: 64.15%</code></pre>
 </div>
 </div>
+<p>Our shallow decision tree achieves roughly 64% accuracy. While not perfect, this confirms a structural pattern in the data: machines are not failing randomly. By simply knowing the cognitive concept being tested (like ‘spatial boundaries’) and the human success rate, we can somewhat reliably predict if the AI will stumble.</p>
+</section>
+<section id="data-wrangling-for-visualization" class="level2">
+<h2 class="anchored" data-anchor-id="data-wrangling-for-visualization">4. Data Wrangling for Visualization</h2>
+<p>To see exactly where the machines are failing, we will aggregate the dataset by concept group to find the average human accuracy, best machine accuracy, and the resulting performance gap.</p>
+<div id="6b40884d" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>concept_summary <span class="op">=</span> conceptarc.groupby(<span class="st">'concept_group'</span>).agg(</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    Avg_Human_Accuracy<span class="op">=</span>(<span class="st">'human_accuracy'</span>, <span class="st">'mean'</span>),</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    Avg_Machine_Accuracy<span class="op">=</span>(<span class="st">'best_machine_accuracy'</span>, <span class="st">'mean'</span>),</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    Avg_Gap<span class="op">=</span>(<span class="st">'human_minus_best_machine'</span>, <span class="st">'mean'</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>).reset_index()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="interactive-altair-visualization" class="level2">
+<h2 class="anchored" data-anchor-id="interactive-altair-visualization">5. Interactive Altair Visualization</h2>
+<p>Finally, we can plot the average human success rate against the machine success rate for each concept group. The red dashed line represents parity (<span class="math inline">\(y=x\)</span>). Any concept falling below this line is a cognitive task where human intuition still beats the machine solvers.</p>
+<div id="cell-fig-conceptarc-gap" class="cell" data-message="false" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>scatter <span class="op">=</span> alt.Chart(concept_summary).mark_circle(size<span class="op">=</span><span class="dv">120</span>, opacity<span class="op">=</span><span class="fl">0.8</span>).encode(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span>alt.X(<span class="st">'Avg_Human_Accuracy:Q'</span>, title<span class="op">=</span><span class="st">'Average Human Success Rate'</span>, scale<span class="op">=</span>alt.Scale(domain<span class="op">=</span>[<span class="dv">0</span>, <span class="dv">1</span>])),</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span>alt.Y(<span class="st">'Avg_Machine_Accuracy:Q'</span>, title<span class="op">=</span><span class="st">'Average Best Machine Success Rate'</span>, scale<span class="op">=</span>alt.Scale(domain<span class="op">=</span>[<span class="dv">0</span>, <span class="dv">1</span>])),</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span>alt.Color(<span class="st">'Avg_Gap:Q'</span>, scale<span class="op">=</span>alt.Scale(scheme<span class="op">=</span><span class="st">'redblue'</span>, reverse<span class="op">=</span><span class="va">True</span>), title<span class="op">=</span><span class="st">'Human Advantage Margin'</span>),</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    tooltip<span class="op">=</span>[<span class="st">'concept_group'</span>, <span class="st">'Avg_Human_Accuracy'</span>, <span class="st">'Avg_Machine_Accuracy'</span>, <span class="st">'Avg_Gap'</span>]</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>).properties(</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"Abstract Reasoning Gap by Cognitive Concept"</span>,</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    width<span class="op">=</span><span class="dv">650</span>,</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    height<span class="op">=</span><span class="dv">450</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>parity_df <span class="op">=</span> pd.DataFrame({<span class="st">'x'</span>: [<span class="dv">0</span>, <span class="dv">1</span>], <span class="st">'y'</span>: [<span class="dv">0</span>, <span class="dv">1</span>]})</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>parity_line <span class="op">=</span> alt.Chart(parity_df).mark_line(color<span class="op">=</span><span class="st">'crimson'</span>, strokeDash<span class="op">=</span>[<span class="dv">5</span>, <span class="dv">5</span>]).encode(</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span><span class="st">'x:Q'</span>,</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span><span class="st">'y:Q'</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>scatter <span class="op">+</span> parity_line</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="fig-conceptarc-gap" class="cell-output cell-output-display quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="6">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-conceptarc-gap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+
+<style>
+  #altair-viz-02c8bb90902347f49e37159f497d18f8.vega-embed {
+    width: 100%;
+    display: flex;
+  }
+
+  #altair-viz-02c8bb90902347f49e37159f497d18f8.vega-embed details,
+  #altair-viz-02c8bb90902347f49e37159f497d18f8.vega-embed details summary {
+    position: relative;
+  }
+</style>
+<div id="altair-viz-02c8bb90902347f49e37159f497d18f8"></div>
+<script type="text/javascript">
+  var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
+  (function(spec, embedOpt){
+    let outputDiv = document.currentScript.previousElementSibling;
+    if (outputDiv.id !== "altair-viz-02c8bb90902347f49e37159f497d18f8") {
+      outputDiv = document.getElementById("altair-viz-02c8bb90902347f49e37159f497d18f8");
+    }
+
+    const paths = {
+      "vega": "https://cdn.jsdelivr.net/npm/vega@6?noext",
+      "vega-lib": "https://cdn.jsdelivr.net/npm/vega-lib?noext",
+      "vega-lite": "https://cdn.jsdelivr.net/npm/vega-lite@6.4.1?noext",
+      "vega-embed": "https://cdn.jsdelivr.net/npm/vega-embed@7?noext",
+    };
+
+    function maybeLoadScript(lib, version) {
+      var key = `${lib.replace("-", "")}_version`;
+      return (VEGA_DEBUG[key] == version) ?
+        Promise.resolve(paths[lib]) :
+        new Promise(function(resolve, reject) {
+          var s = document.createElement('script');
+          document.getElementsByTagName("head")[0].appendChild(s);
+          s.async = true;
+          s.onload = () => {
+            VEGA_DEBUG[key] = version;
+            return resolve(paths[lib]);
+          };
+          s.onerror = () => reject(`Error loading script: ${paths[lib]}`);
+          s.src = paths[lib];
+        });
+    }
+
+    function showError(err) {
+      outputDiv.innerHTML = `<div class="error" style="color:red;">${err}</div>`;
+      throw err;
+    }
+
+    function displayChart(vegaEmbed) {
+      vegaEmbed(outputDiv, spec, embedOpt)
+        .catch(err => showError(`Javascript Error: ${err.message}<br>This usually means there's a typo in your chart specification. See the javascript console for the full traceback.`));
+    }
+
+    if(typeof define === "function" && define.amd) {
+      requirejs.config({paths});
+      let deps = ["vega-embed"];
+      require(deps, displayChart, err => showError(`Error loading script: ${err.message}`));
+    } else {
+      maybeLoadScript("vega", "6")
+        .then(() => maybeLoadScript("vega-lite", "6.4.1"))
+        .then(() => maybeLoadScript("vega-embed", "7"))
+        .catch(showError)
+        .then(() => displayChart(vegaEmbed));
+    }
+  })({"config": {"view": {"continuousWidth": 300, "continuousHeight": 300}}, "layer": [{"data": {"name": "data-0cc2942b4e3f8faba2ea45bab87fa66d"}, "mark": {"type": "circle", "opacity": 0.8, "size": 120}, "encoding": {"color": {"field": "Avg_Gap", "scale": {"reverse": true, "scheme": "redblue"}, "title": "Human Advantage Margin", "type": "quantitative"}, "tooltip": [{"field": "concept_group", "type": "nominal"}, {"field": "Avg_Human_Accuracy", "type": "quantitative"}, {"field": "Avg_Machine_Accuracy", "type": "quantitative"}, {"field": "Avg_Gap", "type": "quantitative"}], "x": {"field": "Avg_Human_Accuracy", "scale": {"domain": [0, 1]}, "title": "Average Human Success Rate", "type": "quantitative"}, "y": {"field": "Avg_Machine_Accuracy", "scale": {"domain": [0, 1]}, "title": "Average Best Machine Success Rate", "type": "quantitative"}}, "title": "Abstract Reasoning Gap by Cognitive Concept"}, {"data": {"name": "data-42f50405073b2dbe8396db6b7dd2f6be"}, "mark": {"type": "line", "color": "crimson", "strokeDash": [5, 5]}, "encoding": {"x": {"field": "x", "type": "quantitative"}, "y": {"field": "y", "type": "quantitative"}}}], "height": 450, "width": 650, "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json", "datasets": {"data-0cc2942b4e3f8faba2ea45bab87fa66d": [{"concept_group": "AboveBelow", "Avg_Human_Accuracy": 0.9122030303030303, "Avg_Machine_Accuracy": 0.7575757575757576, "Avg_Gap": 0.15462727272727272}, {"concept_group": "Center", "Avg_Human_Accuracy": 0.9478121212121212, "Avg_Machine_Accuracy": 0.6666666666666666, "Avg_Gap": 0.28114545454545453}, {"concept_group": "CleanUp", "Avg_Human_Accuracy": 0.9728000000000001, "Avg_Machine_Accuracy": 0.6363636363636364, "Avg_Gap": 0.33643636363636364}, {"concept_group": "CompleteShape", "Avg_Human_Accuracy": 0.856369696969697, "Avg_Machine_Accuracy": 0.7272727272727273, "Avg_Gap": 0.1290969696969697}, {"concept_group": "Copy", "Avg_Human_Accuracy": 0.9417939393939394, "Avg_Machine_Accuracy": 0.5151515151515151, "Avg_Gap": 0.42664242424242427}, {"concept_group": "Count", "Avg_Human_Accuracy": 0.888539393939394, "Avg_Machine_Accuracy": 0.8064516129032258, "Avg_Gap": 0.07629999999999999}, {"concept_group": "ExtendToBoundary", "Avg_Human_Accuracy": 0.9383484848484848, "Avg_Machine_Accuracy": 0.7878787878787878, "Avg_Gap": 0.15046969696969698}, {"concept_group": "ExtractObjects", "Avg_Human_Accuracy": 0.8739090909090909, "Avg_Machine_Accuracy": 0.6363636363636364, "Avg_Gap": 0.23754545454545456}, {"concept_group": "FilledNotFilled", "Avg_Human_Accuracy": 0.9617969696969697, "Avg_Machine_Accuracy": 0.8787878787878788, "Avg_Gap": 0.08300909090909091}, {"concept_group": "HorizontalVertical", "Avg_Human_Accuracy": 0.9155666666666666, "Avg_Machine_Accuracy": 0.6666666666666666, "Avg_Gap": 0.24889999999999998}, {"concept_group": "InsideOutside", "Avg_Human_Accuracy": 0.9177242424242424, "Avg_Machine_Accuracy": 0.6363636363636364, "Avg_Gap": 0.2813606060606061}, {"concept_group": "MoveToBoundary", "Avg_Human_Accuracy": 0.9149484848484849, "Avg_Machine_Accuracy": 0.45454545454545453, "Avg_Gap": 0.4604030303030303}, {"concept_group": "Order", "Avg_Human_Accuracy": 0.8321060606060605, "Avg_Machine_Accuracy": 0.45454545454545453, "Avg_Gap": 0.37756060606060604}, {"concept_group": "SameDifferent", "Avg_Human_Accuracy": 0.8903484848484848, "Avg_Machine_Accuracy": 0.6060606060606061, "Avg_Gap": 0.28428787878787876}, {"concept_group": "TopBottom2D", "Avg_Human_Accuracy": 0.9564393939393939, "Avg_Machine_Accuracy": 0.8181818181818182, "Avg_Gap": 0.13825757575757575}, {"concept_group": "TopBottom3D", "Avg_Human_Accuracy": 0.9331939393939395, "Avg_Machine_Accuracy": 0.696969696969697, "Avg_Gap": 0.23622424242424242}], "data-42f50405073b2dbe8396db6b7dd2f6be": [{"x": 0, "y": 0}, {"x": 1, "y": 1}]}}, {"mode": "vega-lite"});
+</script>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-conceptarc-gap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Human vs.&nbsp;Machine success rates across ConceptARC abstract reasoning tasks.
+</figcaption>
+</figure>
+</div>
+</div>
+</section>
+<section id="discussion" class="level2">
+<h2 class="anchored" data-anchor-id="discussion">Discussion</h2>
+<p>Looking at the plot, human testers clearly maintain the edge across all abstract reasoning categories today, with every single point resting safely below the parity line. However, the tight cluster of blue dots near the top right—where machine success rates approach 90% and the performance gap narrows significantly—shows how recent advancements are beginning to blur that line. While models still experience structural reasoning faults on certain tasks (seen in the deep red outliers), they are undeniably closing in on human intuition in other domains. As architectures continue to evolve, it leaves an open question: are these remaining red gaps a fundamental limit of how machines process abstraction, or simply the final hurdles before true parity is reached?</p>
 
 
 </section>
