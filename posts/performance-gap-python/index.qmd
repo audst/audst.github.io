@@ -3,6 +3,7 @@ title: "The Abstract Reasoning Gap: Human vs. Machine"
 author: "Audrey Tsung"
 date: "2026-09-24"
 ---
+## Introduction
 
 Recent headlines about autonomous AI agents executing real-world cyber breaches make it easy to feel like agentic ai is something within reach. It can feel really daunting without any understanding of the underlying capabilities and limitations. That tension between alarming headlines and actual benchmark rigor is why I chose this dataset. As the race for agentic AI intensifies, it's crucial to separate the signal from the noise.
 
@@ -12,16 +13,10 @@ Whenever a lab claims a model has "surpassed human performance," my immediate re
 
 My goal for this post is to dig into item-level ConceptARC data, benchmarking 482 human testers against machine solvers on the exact same abstract reasoning tasks. A decision tree might seem simplistic compared to modern large language models, but training one across 16 cognitive concepts cuts through the noise. It lets us map exactly where the "superhuman" narrative holds up, and where human intuition still wins.
 
-## Data Source & Pre-processing
-
-This analysis utilizes item-level test data from the [AI Benchmarks vs Human Baselines](https://www.kaggle.com/datasets/kylefengkfeng209/ai-benchmarks-vs-human-baselines) dataset. We examine `conceptarc_human_vs_machine.csv`, which records success rates across 528 identical abstract reasoning tasks. 
-
+## Imports 
 ```{python}
-#| label: fig-conceptarc-gap
-#| fig-cap: "Human vs. Machine success rates across ConceptARC abstract reasoning tasks. The red dashed line represents parity; tasks below the line indicate a human advantage."
-#| warning: false
 #| message: false
-
+#| warning: false
 import pandas as pd
 import altair as alt
 from sklearn.tree import DecisionTreeClassifier
@@ -29,14 +24,36 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 ```
 
+## 1. Data Source & Pre-processing
+
+This analysis utilizes item-level test data from the [AI Benchmarks vs Human Baselines](https://www.kaggle.com/datasets/kylefengkfeng209/ai-benchmarks-vs-human-baselines) dataset. We examine `conceptarc_human_vs_machine.csv`, which records success rates across 528 identical abstract reasoning tasks. 
+
+
 ```{python}
 # Load the dataset
 conceptarc = pd.read_csv("data/conceptarc_human_vs_machine.csv")
 conceptarc.head()
 ```
 
+## 2. Feature Engineering
+We can calculate the best machine's exact score by subtracting the gap from the human accuracy. Let's also create a binary target variable indicating whether at least one machine solver succeeded on the task.
 ```{python}
-from pathlib import Path
-print(Path.cwd())
-print(Path("data/conceptarc_human_vs_machine.csv").exists())
+conceptarc['best_machine_accuracy'] = conceptarc['human_accuracy'] - conceptarc['human_minus_best_machine']
+conceptarc['machine_passed'] = (conceptarc['n_machine_solvers_correct'] > 0).astype(int)
+conceptarc.head()
+```
+
+## 3. Machine Learning: Decision Tree Classifier
+Now, we will try to predict if a machine solver will succeed based on the concept group and human accuracy using `get_dummies` to convert the categorical 'concept_group' into numeric flags for scikit-learn
+
+```{python}
+X = pd.get_dummies(conceptarc[['concept_group', 'human_accuracy']], drop_first=True)
+y = conceptarc['machine_passed']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+clf = DecisionTreeClassifier(max_depth=3, random_state=42)
+clf.fit(X_train, y_train)
+accuracy = clf.score(X_test, y_test)
+print(f"Decision Tree Prediction Accuracy: {accuracy:.2%}")
 ```
