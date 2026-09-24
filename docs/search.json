@@ -4,7 +4,7 @@
     "href": "blog.html",
     "title": "Blog",
     "section": "",
-    "text": "The Abstract Reasoning Gap: Human vs. Machine\n\n\n\n\n\n\nAudrey Tsung\n\n\nSep 24, 2026\n\n\n\n\n\n\n\n\n\n\n\nPredicting Superhuman AI Performance by Task Category\n\n\n\n\n\n\nAudrey Tsung\n\n\nSep 24, 2026\n\n\n\n\n\n\n\n\n\n\n\nWeek 1 of MDS\n\n\n\n\n\n\nAudrey Tsung\n\n\nSep 9, 2026\n\n\n\n\n\n\nNo matching items"
+    "text": "The Abstract Reasoning Gap: Human vs. Machine\n\n\n\n\n\n\nAudrey Tsung\n\n\nSep 24, 2026\n\n\n\n\n\n\n\n\n\n\n\n\n\nPredicting Superhuman AI Performance by Task Category\n\n\n\n\n\n\nAudrey Tsung\n\n\nSep 24, 2026\n\n\n\n\n\n\n\n\n\n\n\nWeek 1 of MDS\n\n\n\n\n\n\nAudrey Tsung\n\n\nSep 9, 2026\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "index.html",
@@ -18,14 +18,35 @@
     "href": "posts/ai-performance-pred-r/index.html",
     "title": "Predicting Superhuman AI Performance by Task Category",
     "section": "",
-    "text": "This analysis investigates the cognitive domains where AI exceeds human capabilities using the AI Benchmarks vs Human Baselines Kaggle dataset.\nTo ensure offline reproducibility and adhere to file size constraints, a static snapshot of the dataset was committed to data/benchmarks.csv.\n\nlibrary(readr)\nlibrary(dplyr)\nlibrary(ggplot2)\n\n# Load the curated dataset\nbenchmarks &lt;- read_csv(\"data/benchmarks.csv\", show_col_types = FALSE)\nhead(benchmarks)\n\n# A tibble: 6 × 25\n  benchmark  short_name release_year creator_org n_items modality reasoning_type\n  &lt;chr&gt;      &lt;chr&gt;             &lt;dbl&gt; &lt;chr&gt;         &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt;         \n1 ARC-AGI-1  ARC-AGI-1          2019 Francois C…    1000 visual_… abstract_indu…\n2 ARC-AGI-2  ARC-AGI-2          2025 ARC Prize …    1240 visual_… abstract_indu…\n3 ARC-AGI-3  ARC-AGI-3          2026 ARC Prize …      NA interac… abstract_indu…\n4 ConceptARC ConceptARC         2023 Santa Fe I…     160 visual_… conceptual_an…\n5 RAVEN / I… RAVEN              2019 UCLA (Zhan…   70000 visual   analogical    \n6 Bongard-L… Bongard-L…         2020 NVIDIA (Ni…   12000 visual   concept_induc…\n# ℹ 18 more variables: metric_unit &lt;chr&gt;, human_baseline_exists &lt;dbl&gt;,\n#   human_baseline_pct &lt;dbl&gt;, human_baseline_type &lt;chr&gt;,\n#   human_baseline_n &lt;dbl&gt;, human_baseline_note &lt;chr&gt;,\n#   best_ai_at_release_pct &lt;dbl&gt;, best_ai_at_release_system &lt;chr&gt;,\n#   best_ai_at_release_year &lt;dbl&gt;, best_ai_latest_pct &lt;dbl&gt;,\n#   best_ai_latest_system &lt;chr&gt;, best_ai_latest_asof &lt;chr&gt;,\n#   ai_exceeds_human &lt;dbl&gt;, saturation_status &lt;chr&gt;, benchmark_license &lt;chr&gt;, …"
+    "text": "Google DeepMind / Unsplash"
+  },
+  {
+    "objectID": "posts/ai-performance-pred-r/index.html#introduction",
+    "href": "posts/ai-performance-pred-r/index.html#introduction",
+    "title": "Predicting Superhuman AI Performance by Task Category",
+    "section": "Introduction",
+    "text": "Introduction\nWhen a tech company announces their newest AI model has achieved “superhuman” status, the claim sounds definitive. But diving into the actual dataset can reveal what is lacking in the measurement: the “human baseline” being beaten is almost never a constant. Sometimes the benchmark tests a PhD expert in a specific field, other times it uses an unspecialized crowdworker, and occasionally, it relies on an estimate that nobody ever formally tested.\nIn this post, we shift from analyzing individual reasoning tasks to performing a meta-analysis on the benchmarks themselves. Using logistic regression in R, we will explore whether the type of human baseline (e.g., expert vs. crowdworker) statistically impacts the likelihood of an AI model officially surpassing it."
+  },
+  {
+    "objectID": "posts/ai-performance-pred-r/index.html#imports",
+    "href": "posts/ai-performance-pred-r/index.html#imports",
+    "title": "Predicting Superhuman AI Performance by Task Category",
+    "section": "Imports",
+    "text": "Imports\n\nlibrary(readr)\nlibrary(dplyr)\nlibrary(ggplot2)"
   },
   {
     "objectID": "posts/ai-performance-pred-r/index.html#data-source-pre-processing",
     "href": "posts/ai-performance-pred-r/index.html#data-source-pre-processing",
     "title": "Predicting Superhuman AI Performance by Task Category",
-    "section": "",
-    "text": "This analysis investigates the cognitive domains where AI exceeds human capabilities using the AI Benchmarks vs Human Baselines Kaggle dataset.\nTo ensure offline reproducibility and adhere to file size constraints, a static snapshot of the dataset was committed to data/benchmarks.csv.\n\nlibrary(readr)\nlibrary(dplyr)\nlibrary(ggplot2)\n\n# Load the curated dataset\nbenchmarks &lt;- read_csv(\"data/benchmarks.csv\", show_col_types = FALSE)\nhead(benchmarks)\n\n# A tibble: 6 × 25\n  benchmark  short_name release_year creator_org n_items modality reasoning_type\n  &lt;chr&gt;      &lt;chr&gt;             &lt;dbl&gt; &lt;chr&gt;         &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt;         \n1 ARC-AGI-1  ARC-AGI-1          2019 Francois C…    1000 visual_… abstract_indu…\n2 ARC-AGI-2  ARC-AGI-2          2025 ARC Prize …    1240 visual_… abstract_indu…\n3 ARC-AGI-3  ARC-AGI-3          2026 ARC Prize …      NA interac… abstract_indu…\n4 ConceptARC ConceptARC         2023 Santa Fe I…     160 visual_… conceptual_an…\n5 RAVEN / I… RAVEN              2019 UCLA (Zhan…   70000 visual   analogical    \n6 Bongard-L… Bongard-L…         2020 NVIDIA (Ni…   12000 visual   concept_induc…\n# ℹ 18 more variables: metric_unit &lt;chr&gt;, human_baseline_exists &lt;dbl&gt;,\n#   human_baseline_pct &lt;dbl&gt;, human_baseline_type &lt;chr&gt;,\n#   human_baseline_n &lt;dbl&gt;, human_baseline_note &lt;chr&gt;,\n#   best_ai_at_release_pct &lt;dbl&gt;, best_ai_at_release_system &lt;chr&gt;,\n#   best_ai_at_release_year &lt;dbl&gt;, best_ai_latest_pct &lt;dbl&gt;,\n#   best_ai_latest_system &lt;chr&gt;, best_ai_latest_asof &lt;chr&gt;,\n#   ai_exceeds_human &lt;dbl&gt;, saturation_status &lt;chr&gt;, benchmark_license &lt;chr&gt;, …"
+    "section": "1.Data Source & Pre-processing",
+    "text": "1.Data Source & Pre-processing\nThis analysis investigates the cognitive domains where AI exceeds human capabilities using the AI Benchmarks vs Human Baselines Kaggle dataset.\n\nbenchmarks &lt;- read_csv(\"data/benchmarks.csv\", show_col_types = FALSE)\nhead(benchmarks)\n\n# A tibble: 6 × 25\n  benchmark  short_name release_year creator_org n_items modality reasoning_type\n  &lt;chr&gt;      &lt;chr&gt;             &lt;dbl&gt; &lt;chr&gt;         &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt;         \n1 ARC-AGI-1  ARC-AGI-1          2019 Francois C…    1000 visual_… abstract_indu…\n2 ARC-AGI-2  ARC-AGI-2          2025 ARC Prize …    1240 visual_… abstract_indu…\n3 ARC-AGI-3  ARC-AGI-3          2026 ARC Prize …      NA interac… abstract_indu…\n4 ConceptARC ConceptARC         2023 Santa Fe I…     160 visual_… conceptual_an…\n5 RAVEN / I… RAVEN              2019 UCLA (Zhan…   70000 visual   analogical    \n6 Bongard-L… Bongard-L…         2020 NVIDIA (Ni…   12000 visual   concept_induc…\n# ℹ 18 more variables: metric_unit &lt;chr&gt;, human_baseline_exists &lt;dbl&gt;,\n#   human_baseline_pct &lt;dbl&gt;, human_baseline_type &lt;chr&gt;,\n#   human_baseline_n &lt;dbl&gt;, human_baseline_note &lt;chr&gt;,\n#   best_ai_at_release_pct &lt;dbl&gt;, best_ai_at_release_system &lt;chr&gt;,\n#   best_ai_at_release_year &lt;dbl&gt;, best_ai_latest_pct &lt;dbl&gt;,\n#   best_ai_latest_system &lt;chr&gt;, best_ai_latest_asof &lt;chr&gt;,\n#   ai_exceeds_human &lt;dbl&gt;, saturation_status &lt;chr&gt;, benchmark_license &lt;chr&gt;, …"
+  },
+  {
+    "objectID": "posts/ai-performance-pred-r/index.html#feature-engineering",
+    "href": "posts/ai-performance-pred-r/index.html#feature-engineering",
+    "title": "Predicting Superhuman AI Performance by Task Category",
+    "section": "2. Feature Engineering",
+    "text": "2. Feature Engineering\nTo build our model, we need to filter out benchmarks that lack a measured baseline (where ai_exceeds_human is missing). We will also group the granular human_baseline_type into broader categories so our model has sufficient data per group.\n\nclean_benchmarks &lt;- benchmarks |&gt;\n  filter(!is.na(ai_exceeds_human), !is.na(human_baseline_type)) |&gt;\n  mutate(\n    baseline_category = case_when(\n      grepl(\"expert\", human_baseline_type) ~ \"Expert Baseline\",\n      grepl(\"crowd|annotator\", human_baseline_type) ~ \"Crowdworker Baseline\",\n      TRUE ~ \"Estimated/Other\"\n    ),\n    baseline_category = as.factor(baseline_category)\n  )\n\nhead(clean_benchmarks |&gt; select(benchmark, baseline_category, ai_exceeds_human))\n\n# A tibble: 6 × 3\n  benchmark       baseline_category    ai_exceeds_human\n  &lt;chr&gt;           &lt;fct&gt;                           &lt;dbl&gt;\n1 ARC-AGI-1       Crowdworker Baseline                1\n2 ARC-AGI-2       Crowdworker Baseline                0\n3 ARC-AGI-3       Crowdworker Baseline                0\n4 ConceptARC      Crowdworker Baseline                1\n5 RAVEN / I-RAVEN Crowdworker Baseline                1\n6 Bongard-LOGO    Expert Baseline                     0"
   },
   {
     "objectID": "posts/performance-gap-python/index.html",

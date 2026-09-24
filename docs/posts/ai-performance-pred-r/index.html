@@ -328,7 +328,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#data-source-pre-processing" id="toc-data-source-pre-processing" class="nav-link active" data-scroll-target="#data-source-pre-processing">Data Source &amp; Pre-processing</a></li>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#imports" id="toc-imports" class="nav-link" data-scroll-target="#imports">Imports</a></li>
+  <li><a href="#data-source-pre-processing" id="toc-data-source-pre-processing" class="nav-link" data-scroll-target="#data-source-pre-processing">1.Data Source &amp; Pre-processing</a></li>
+  <li><a href="#feature-engineering" id="toc-feature-engineering" class="nav-link" data-scroll-target="#feature-engineering">2. Feature Engineering</a></li>
   </ul>
 </nav>
     </div>
@@ -367,18 +370,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<section id="data-source-pre-processing" class="level2">
-<h2 class="anchored" data-anchor-id="data-source-pre-processing">Data Source &amp; Pre-processing</h2>
-<p>This analysis investigates the cognitive domains where AI exceeds human capabilities using the <a href="https://www.kaggle.com/datasets/kylefengkfeng209/ai-benchmarks-vs-human-baselines">AI Benchmarks vs Human Baselines</a> Kaggle dataset.</p>
-<p>To ensure offline reproducibility and adhere to file size constraints, a static snapshot of the dataset was committed to <code>data/benchmarks.csv</code>.</p>
+<div class="quarto-figure quarto-figure-left">
+<figure class="figure">
+<p><img src="../../images/google-deepmind2.jpg" class="img-fluid figure-img"></p>
+<figcaption>Google DeepMind / Unsplash</figcaption>
+</figure>
+</div>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>When a tech company announces their newest AI model has achieved “superhuman” status, the claim sounds definitive. But diving into the actual dataset can reveal what is lacking in the measurement: the “human baseline” being beaten is almost never a constant. Sometimes the benchmark tests a PhD expert in a specific field, other times it uses an unspecialized crowdworker, and occasionally, it relies on an estimate that nobody ever formally tested.</p>
+<p>In this post, we shift from analyzing individual reasoning tasks to performing a meta-analysis on the benchmarks themselves. Using logistic regression in R, we will explore whether the <em>type</em> of human baseline (e.g., expert vs.&nbsp;crowdworker) statistically impacts the likelihood of an AI model officially surpassing it.</p>
+</section>
+<section id="imports" class="level2">
+<h2 class="anchored" data-anchor-id="imports">Imports</h2>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the curated dataset</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>benchmarks <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/benchmarks.csv"</span>, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(benchmarks)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="data-source-pre-processing" class="level2">
+<h2 class="anchored" data-anchor-id="data-source-pre-processing">1.Data Source &amp; Pre-processing</h2>
+<p>This analysis investigates the cognitive domains where AI exceeds human capabilities using the <a href="https://www.kaggle.com/datasets/kylefengkfeng209/ai-benchmarks-vs-human-baselines">AI Benchmarks vs Human Baselines</a> Kaggle dataset.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>benchmarks <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/benchmarks.csv"</span>, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(benchmarks)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 6 × 25
   benchmark  short_name release_year creator_org n_items modality reasoning_type
@@ -396,6 +412,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 #   best_ai_at_release_year &lt;dbl&gt;, best_ai_latest_pct &lt;dbl&gt;,
 #   best_ai_latest_system &lt;chr&gt;, best_ai_latest_asof &lt;chr&gt;,
 #   ai_exceeds_human &lt;dbl&gt;, saturation_status &lt;chr&gt;, benchmark_license &lt;chr&gt;, …</code></pre>
+</div>
+</div>
+</section>
+<section id="feature-engineering" class="level2">
+<h2 class="anchored" data-anchor-id="feature-engineering">2. Feature Engineering</h2>
+<p>To build our model, we need to filter out benchmarks that lack a measured baseline (where ai_exceeds_human is missing). We will also group the granular <code>human_baseline_type</code> into broader categories so our model has sufficient data per group.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>clean_benchmarks <span class="ot">&lt;-</span> benchmarks <span class="sc">|&gt;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(ai_exceeds_human), <span class="sc">!</span><span class="fu">is.na</span>(human_baseline_type)) <span class="sc">|&gt;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">baseline_category =</span> <span class="fu">case_when</span>(</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">grepl</span>(<span class="st">"expert"</span>, human_baseline_type) <span class="sc">~</span> <span class="st">"Expert Baseline"</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">grepl</span>(<span class="st">"crowd|annotator"</span>, human_baseline_type) <span class="sc">~</span> <span class="st">"Crowdworker Baseline"</span>,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"Estimated/Other"</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">baseline_category =</span> <span class="fu">as.factor</span>(baseline_category)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(clean_benchmarks <span class="sc">|&gt;</span> <span class="fu">select</span>(benchmark, baseline_category, ai_exceeds_human))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 3
+  benchmark       baseline_category    ai_exceeds_human
+  &lt;chr&gt;           &lt;fct&gt;                           &lt;dbl&gt;
+1 ARC-AGI-1       Crowdworker Baseline                1
+2 ARC-AGI-2       Crowdworker Baseline                0
+3 ARC-AGI-3       Crowdworker Baseline                0
+4 ConceptARC      Crowdworker Baseline                1
+5 RAVEN / I-RAVEN Crowdworker Baseline                1
+6 Bongard-LOGO    Expert Baseline                     0</code></pre>
 </div>
 </div>
 
