@@ -2,7 +2,9 @@
 title: "The Abstract Reasoning Gap: Human vs. Machine"
 author: "Audrey Tsung"
 date: "2026-09-24"
+image: "../../images/google-deepmind1.jpg"
 ---
+![Google DeepMind / Unsplash ](../../images/google-deepmind1.jpg){width=250, fig-align="left"}
 
 ## Introduction
 
@@ -29,7 +31,6 @@ from sklearn.metrics import accuracy_score
 This analysis utilizes item-level test data from the [AI Benchmarks vs Human Baselines](https://www.kaggle.com/datasets/kylefengkfeng209/ai-benchmarks-vs-human-baselines?utm_source=gemini) dataset. We will examine `conceptarc_human_vs_machine.csv`, which records success rates across 528 identical abstract reasoning tasks.
 
 ```{python}
-# Load the dataset
 conceptarc = pd.read_csv("data/conceptarc_human_vs_machine.csv")
 conceptarc.head()
 

@@ -406,6 +406,12 @@ window.Quarto = {
 </header>
 
 
+<div class="quarto-figure quarto-figure-left">
+<figure class="figure">
+<p><img src="../../images/google-deepmind1.jpg" class="img-fluid figure-img"></p>
+<figcaption>Google DeepMind / Unsplash</figcaption>
+</figure>
+</div>
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
 <p>It is easy to read recent headlines about AI agents executing real-world cyber breaches and assume superhuman, agentic AI is already here. But whenever a lab claims their newest model has “surpassed human performance,” there should be a clear definition of <em>Which</em> humans, and evaluated under <em>what</em> conditions?</p>
@@ -414,7 +420,7 @@ window.Quarto = {
 </section>
 <section id="imports" class="level2">
 <h2 class="anchored" data-anchor-id="imports">Imports</h2>
-<div id="c24c9528" class="cell" data-message="false" data-execution_count="1">
+<div id="6e5452c5" class="cell" data-message="false" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> altair <span class="im">as</span> alt</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.tree <span class="im">import</span> DecisionTreeClassifier</span>
@@ -425,11 +431,10 @@ window.Quarto = {
 <section id="data-source-pre-processing" class="level2">
 <h2 class="anchored" data-anchor-id="data-source-pre-processing">1. Data Source &amp; Pre-processing</h2>
 <p>This analysis utilizes item-level test data from the <a href="https://www.kaggle.com/datasets/kylefengkfeng209/ai-benchmarks-vs-human-baselines?utm_source=gemini">AI Benchmarks vs Human Baselines</a> dataset. We will examine <code>conceptarc_human_vs_machine.csv</code>, which records success rates across 528 identical abstract reasoning tasks.</p>
-<div id="22d11742" class="cell" data-execution_count="2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the dataset</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>conceptarc <span class="op">=</span> pd.read_csv(<span class="st">"data/conceptarc_human_vs_machine.csv"</span>)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>conceptarc.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="2">
+<div id="f737a91b" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>conceptarc <span class="op">=</span> pd.read_csv(<span class="st">"data/conceptarc_human_vs_machine.csv"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>conceptarc.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="56">
 <div>
 
 
@@ -555,11 +560,11 @@ window.Quarto = {
 <section id="feature-engineering" class="level2">
 <h2 class="anchored" data-anchor-id="feature-engineering">2. Feature Engineering</h2>
 <p>We can calculate the best machine’s exact score by subtracting the performance gap from the human accuracy. We also need to create a binary target variable (<code>machine_passed</code>) indicating whether at least one of the machine solvers succeeded on the task.</p>
-<div id="b1a75ea1" class="cell" data-execution_count="3">
+<div id="b92e5777" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>conceptarc[<span class="st">'best_machine_accuracy'</span>] <span class="op">=</span> conceptarc[<span class="st">'human_accuracy'</span>] <span class="op">-</span> conceptarc[<span class="st">'human_minus_best_machine'</span>]</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>conceptarc[<span class="st">'machine_passed'</span>] <span class="op">=</span> (conceptarc[<span class="st">'n_machine_solvers_correct'</span>] <span class="op">&gt;</span> <span class="dv">0</span>).astype(<span class="bu">int</span>)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>conceptarc.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="3">
+<div class="cell-output cell-output-display" data-execution_count="57">
 <div>
 
 
@@ -697,7 +702,7 @@ window.Quarto = {
 <section id="machine-learning-decision-tree-classifier" class="level2">
 <h2 class="anchored" data-anchor-id="machine-learning-decision-tree-classifier">3. Machine Learning: Decision Tree Classifier</h2>
 <p>Can we predict if a machine solver will fail based entirely on how humans performed and the type of concept being tested? We will use <code>get_dummies</code> to convert the categorical <code>concept_group</code> into numeric flags for scikit-learn.</p>
-<div id="ef9ef7f6" class="cell" data-execution_count="4">
+<div id="9ed7f4ea" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> pd.get_dummies(conceptarc[[<span class="st">'concept_group'</span>, <span class="st">'human_accuracy'</span>]], drop_first<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> conceptarc[<span class="st">'machine_passed'</span>]</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -716,7 +721,7 @@ window.Quarto = {
 <section id="data-wrangling-for-visualization" class="level2">
 <h2 class="anchored" data-anchor-id="data-wrangling-for-visualization">4. Data Wrangling for Visualization</h2>
 <p>To see exactly where the machines are failing, we will aggregate the dataset by concept group to find the average human accuracy, best machine accuracy, and the resulting performance gap.</p>
-<div id="6b40884d" class="cell" data-execution_count="5">
+<div id="01c29d72" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>concept_summary <span class="op">=</span> conceptarc.groupby(<span class="st">'concept_group'</span>).agg(</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    Avg_Human_Accuracy<span class="op">=</span>(<span class="st">'human_accuracy'</span>, <span class="st">'mean'</span>),</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    Avg_Machine_Accuracy<span class="op">=</span>(<span class="st">'best_machine_accuracy'</span>, <span class="st">'mean'</span>),</span>
@@ -746,28 +751,28 @@ window.Quarto = {
 <span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>scatter <span class="op">+</span> parity_line</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div id="fig-conceptarc-gap" class="cell-output cell-output-display quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="6">
+<div id="fig-conceptarc-gap" class="cell-output cell-output-display quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="60">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-conceptarc-gap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 
 <style>
-  #altair-viz-02c8bb90902347f49e37159f497d18f8.vega-embed {
+  #altair-viz-9c9912cb0b354b3fb2a9df6c66191dc7.vega-embed {
     width: 100%;
     display: flex;
   }
 
-  #altair-viz-02c8bb90902347f49e37159f497d18f8.vega-embed details,
-  #altair-viz-02c8bb90902347f49e37159f497d18f8.vega-embed details summary {
+  #altair-viz-9c9912cb0b354b3fb2a9df6c66191dc7.vega-embed details,
+  #altair-viz-9c9912cb0b354b3fb2a9df6c66191dc7.vega-embed details summary {
     position: relative;
   }
 </style>
-<div id="altair-viz-02c8bb90902347f49e37159f497d18f8"></div>
+<div id="altair-viz-9c9912cb0b354b3fb2a9df6c66191dc7"></div>
 <script type="text/javascript">
   var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
   (function(spec, embedOpt){
     let outputDiv = document.currentScript.previousElementSibling;
-    if (outputDiv.id !== "altair-viz-02c8bb90902347f49e37159f497d18f8") {
-      outputDiv = document.getElementById("altair-viz-02c8bb90902347f49e37159f497d18f8");
+    if (outputDiv.id !== "altair-viz-9c9912cb0b354b3fb2a9df6c66191dc7") {
+      outputDiv = document.getElementById("altair-viz-9c9912cb0b354b3fb2a9df6c66191dc7");
     }
 
     const paths = {
