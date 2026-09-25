@@ -33,3 +33,79 @@ This analysis investigates the cognitive domains where AI exceeds human capabili
 benchmarks <- read_csv("data/benchmarks.csv", show_col_types = FALSE)
 head(benchmarks)
 ```
+
+## 2. Feature Engineering
+
+To visualize the growth accurately, we need to isolate benchmarks that have both a release score and a latest recorded score. We will filter for benchmarks using percentage-based metrics (`metric_unit == "percent"`) to ensure a consistent 0-100% scale on our axis, calculate the total point improvement, and use the `short_name` column to keep our chart labels readable.
+
+```{r}
+saturation_data <- benchmarks |>
+  filter(
+    metric_unit == "percent",
+    !is.na(best_ai_at_release_pct), 
+    !is.na(best_ai_latest_pct)
+  ) |>
+  mutate(
+    # Convert whole numbers to decimals so scales::percent_format() works
+    best_ai_at_release_pct = best_ai_at_release_pct / 100,
+    best_ai_latest_pct = best_ai_latest_pct / 100,
+    
+    score_improvement = best_ai_latest_pct - best_ai_at_release_pct,
+    is_saturated = ifelse(best_ai_latest_pct >= 0.90, "Saturated (>90%)", "Active")
+  ) |>
+  arrange(desc(score_improvement)) |>
+  slice_head(n = 15)
+```
+
+
+## 3. Visualization
+
+A dumbbell plot is ideal for tracking start-to-finish metrics. We will use `geom_segment` to draw the progression line, capping the ends with points to represent the score on launch day (`best_ai_at_release_pct`) versus today (`best_ai_latest_pct`).
+
+```{r}
+#| label: fig-benchmark-saturation
+#| fig-cap: "The progression of top AI scores from the day a benchmark was released to the latest recorded measurement."
+#| warning: false
+#| fig-height: 7
+#| fig-width: 9
+
+ggplot(saturation_data) +
+  geom_segment(
+    aes(
+      x = best_ai_at_release_pct, 
+      xend = best_ai_latest_pct, 
+      y = reorder(short_name, best_ai_latest_pct), 
+      yend = short_name
+    ),
+    color = "gray70", linewidth = 1.2
+  ) +
+  geom_point(
+    aes(x = best_ai_at_release_pct, y = short_name), 
+    color = "#E66100", size = 4, alpha = 0.8
+  ) +
+  geom_point(
+    aes(x = best_ai_latest_pct, y = short_name, color = is_saturated), 
+    size = 4
+  ) +
+  scale_x_continuous(labels = scales::percent_format(), limits = c(0, 1)) +
+  scale_color_manual(values = c("Active" = "#5D3A9B", "Saturated (>90%)" = "#1E88E5")) +
+  labs(
+    title = "The Velocity of AI Benchmark Saturation",
+    subtitle = "Tracking the jump from initial release score (orange) to the latest state-of-the-art",
+    x = "AI Performance Score",
+    y = NULL,
+    color = "Current Status"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 15),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.y = element_blank(),
+    legend.position = "bottom"
+  )
+
+```
+
+## Conclusion
+
+The visual jump from the orange release points to the current leading scores captures the sheer momentum of recent model iterations. Many benchmarks that launched with AI struggling to clear 30% or 40% have been rapidly compressed into the >90% saturation zone. However, a few domains remain highly resistant to this explosive growth, indicated by much shorter progression lines. Recognizing how quickly a test can go from an insurmountable challenge to a solved problem demonstrates why static evaluations are struggling to keep pace, forcing the industry to constantly invent harder reasoning tasks to find the ceiling of these capabilities.
