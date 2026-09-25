@@ -51,14 +51,13 @@ To ensure complete offline reproducibility, the lightweight summary and item-lev
 This project uses `uv` for Python dependency management and `renv` for R packages to ensure the blog posts render identically on any machine.
 
 ### ⋆˚˖° Prerequisites
-
-* [Quarto](https://quarto.org/docs/get-started/?utm_source=gemini)
-* Python & [uv](https://docs.astral.sh/uv/?utm_source=gemini)
-* R
+> * [Quarto](https://quarto.org/docs/get-started/?utm_source=gemini)
+> * Python & [uv](https://docs.astral.sh/uv/?utm_source=gemini)
+> * R
 
 ### ⋆˚｡ Build Instructions
 
-1. Clone the repository
+#### 1. Clone the repository
 
 ```bash
 git clone https://github.com/audst/audst.github.io.git
@@ -66,7 +65,7 @@ cd audst.github.io
 
 ```
 
-2. Restore the environments
+#### 2. Restore the environments
 
 Sync the Python environment using `uv`:
 
@@ -81,7 +80,7 @@ Restore the R package library using `renv`:
 Rscript -e 'renv::restore()'
 
 ```
-3. Preview or Render the site
+#### 3. Preview or Render the site
 
 To perform a full build of the site:
 
@@ -97,7 +96,8 @@ uv run quarto preview
 
 ```
 
-4. View the Output
+#### 4. View the Output
+
 The rendered website is written to the docs/ directory.
 
 To view the finalized site locally, open `docs/index.html` in a web browser.
