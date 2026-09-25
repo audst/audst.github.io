@@ -13,6 +13,7 @@ My personal website and portfolio is built with **Quarto** and **CSS** and is my
 - Blog posts about projects, coursework, and experiences
 - Responsive website with custom CSS and light/dark theme styling
 - Quarto-rendered pages ready for web publishing
+- Fully reproducible Python (`uv`) and R (`renv`) analysis environments
 
 ---
 
@@ -20,30 +21,80 @@ My personal website and portfolio is built with **Quarto** and **CSS** and is my
 
 ```bash
 .
-├── index.qmd          # Homepage
-├── about.qmd          # About page
-├── posts/             # Blog posts and MDS reflections
+├── data/              # Static datasets for blog analyses
+├── docs/              # Rendered website files (GitHub Pages output)
 ├── images/            # Images used throughout the website
-├── theme.scss         # Light theme colors and typography
-├── theme-dark.scss    # Dark theme colors and typography
-├── styles.css         # Custom website styling
+├── posts/             # Blog posts and MDS reflections
 ├── _quarto.yml        # Quarto website configuration
-├── docs/              # Rendered website files
+├── about.qmd          # About page
+├── blog.qmd           # Blog post listing page
+├── index.qmd          # Homepage
+├── pyproject.toml     # Python environment configuration (uv)
+├── renv.lock          # R environment configuration
+├── styles.css         # Custom website styling
+├── theme*.scss        # Light and dark theme configuration
 └── README.md
 ```
 
 ---
 
-## ⋆˚✿˖° Local Development
+## ⋆˚˖° Data Sources
 
-Install [Quarto](https://quarto.org/docs/get-started/) and run the following commands from the project directory:
+The machine learning analyses featured in the portfolio utilize the [**AI Benchmarks vs Human Baselines**](https://www.kaggle.com/datasets/kylefengkfeng209/ai-benchmarks-vs-human-baselines) dataset from Kaggle.
+
+To ensure complete offline reproducibility, the lightweight summary and item-level files (`benchmarks.csv` and `conceptarc_human_vs_machine.csv`) are committed directly to the `data/` directory. 
+
+---
+
+## ⋆˚✿˖° Installation & Local Development
+
+This project uses `uv` for Python dependency management and `renv` for R packages to ensure the blog posts render identically on any machine.
+
+### ⋆˚˖° Prerequisites
+
+* [Quarto](https://quarto.org/docs/get-started/?utm_source=gemini)
+* Python & [uv](https://docs.astral.sh/uv/?utm_source=gemini)
+* R
+
+### ⋆˚｡ Build Instructions
+
+**1. Clone the repository**
 
 ```bash
-# Preview the website locally
-quarto preview
+git clone [https://github.com/audst/audst.github.io.git](https://github.com/audst/audst.github.io.git)
+cd audst.github.io
 
-# Render the website into docs/
-quarto render
 ```
 
-The rendered website is written to `docs/` and can be published using GitHub Pages.
+**2. Restore the environments**
+Sync the Python environment using `uv`:
+
+```bash
+uv sync
+
+```
+
+Restore the R package library using `renv`:
+
+```bash
+Rscript -e 'renv::restore()'
+
+```
+
+**3. Preview or Render the site**
+To perform a full build of the site:
+
+```bash
+uv run quarto render
+
+```
+
+To preview the website locally with live-reloading:
+
+```bash
+uv run quarto preview
+
+```
+
+**4. View the output**
+The rendered website is written to `docs/` and can be published using GitHub Pages. To view the finalized build locally, simply open `docs/index.html` in any web browser.
