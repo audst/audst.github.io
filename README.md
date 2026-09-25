@@ -58,7 +58,7 @@ This project uses `uv` for Python dependency management and `renv` for R package
 
 ### ⋆˚｡ Build Instructions
 
-**1. Clone the repository**
+1. Clone the repository
 
 ```bash
 git clone [https://github.com/audst/audst.github.io.git](https://github.com/audst/audst.github.io.git)
@@ -66,7 +66,8 @@ cd audst.github.io
 
 ```
 
-**2. Restore the environments**
+2. Restore the environments
+
 Sync the Python environment using `uv`:
 
 ```bash
@@ -80,8 +81,8 @@ Restore the R package library using `renv`:
 Rscript -e 'renv::restore()'
 
 ```
+3. Preview or Render the site
 
-**3. Preview or Render the site**
 To perform a full build of the site:
 
 ```bash
@@ -96,5 +97,9 @@ uv run quarto preview
 
 ```
 
-**4. View the output**
-The rendered website is written to `docs/` and can be published using GitHub Pages. To view the finalized build locally, simply open `docs/index.html` in any web browser.
+4. View the Output
+The rendered website is written to the docs/ directory.
+
+To view the finalized site locally, open `docs/index.html` in a web browser.
+
+The docs/ directory can also be published using GitHub Pages. 
