@@ -61,7 +61,7 @@ This project uses `uv` for Python dependency management and `renv` for R package
 1. Clone the repository
 
 ```bash
-git clone [https://github.com/audst/audst.github.io.git](https://github.com/audst/audst.github.io.git)
+git clone https://github.com/audst/audst.github.io.git
 cd audst.github.io
 
 ```
