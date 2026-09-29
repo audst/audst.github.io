@@ -1,0 +1,139 @@
+---
+title: "Interactive Benchmark Explorer"
+jupyter: audst-uv
+author: "Audrey Tsung"
+date: "2026-09-29"
+image: "../../images/google-deepmind3.jpg"
+---
+
+
+The chart compares reported human baseline scores with each benchmark’s latest
+reported AI score. Use the dropdowns to focus on a modality or reasoning type,
+and hover over points for details. Scores are not perfectly comparable across
+benchmarks because their tasks and human evaluation methods differ; missing
+scores are left out.
+
+Source: [AI Benchmarks vs Human Baselines on Kaggle](https://www.kaggle.com/datasets/kylefengkfeng209/ai-benchmarks-vs-human-baselines).
+
+```{python}
+#| echo: false
+
+from pathlib import Path
+
+import altair as alt
+import pandas as pd
+
+data_file = next(
+    (
+        folder / "data" / "benchmarks.csv"
+        for folder in [Path.cwd(), *Path.cwd().parents]
+        if (folder / "data" / "benchmarks.csv").exists()
+    ),
+    None,
+)
+
+if data_file is None:
+    raise FileNotFoundError("Could not find data/benchmarks.csv")
+
+benchmarks = pd.read_csv(data_file)
+
+score_columns = ["human_baseline_pct", "best_ai_latest_pct"]
+for column in score_columns:
+    benchmarks[column] = pd.to_numeric(benchmarks[column], errors="coerce")
+
+benchmarks["modality"] = benchmarks["modality"].fillna("Unknown")
+benchmarks["reasoning_type"] = benchmarks["reasoning_type"].fillna("Unknown")
+
+plot_data = (
+    benchmarks[
+        ["benchmark", "modality", "reasoning_type", *score_columns]
+    ]
+    .melt(
+        id_vars=["benchmark", "modality", "reasoning_type"],
+        value_vars=score_columns,
+        var_name="measure",
+        value_name="score",
+    )
+    .dropna(subset=["score"])
+)
+
+plot_data["measure"] = plot_data["measure"].map(
+    {
+        "human_baseline_pct": "Human baseline",
+        "best_ai_latest_pct": "Latest AI",
+    }
+)
+
+benchmark_order = (
+    benchmarks.sort_values("best_ai_latest_pct", ascending=False)["benchmark"]
+    .drop_duplicates()
+    .tolist()
+)
+
+modalities = sorted(plot_data["modality"].unique())
+reasoning_types = sorted(plot_data["reasoning_type"].unique())
+
+modality_filter = alt.param(
+    name="modality_filter",
+    value="All",
+    bind=alt.binding_select(
+        options=["All", *modalities],
+        name="Modality: ",
+    ),
+)
+
+reasoning_filter = alt.param(
+    name="reasoning_filter",
+    value="All",
+    bind=alt.binding_select(
+        options=["All", *reasoning_types],
+        name="Reasoning type: ",
+    ),
+)
+
+chart = (
+    alt.Chart(plot_data)
+    .mark_circle(size=110, opacity=0.85)
+    .encode(
+        x=alt.X(
+            "score:Q",
+            title="Score (%)",
+            scale=alt.Scale(domain=[0, 100]),
+        ),
+        y=alt.Y(
+            "benchmark:N",
+            title=None,
+            sort=benchmark_order,
+            axis=alt.Axis(labelLimit=200),
+        ),
+        color=alt.Color(
+            "measure:N",
+            title="Score",
+            scale=alt.Scale(
+                domain=["Human baseline", "Latest AI"],
+                range=["#4C78A8", "#F58518"],
+            ),
+        ),
+        tooltip=[
+            alt.Tooltip("benchmark:N", title="Benchmark"),
+            alt.Tooltip("measure:N", title="Measure"),
+            alt.Tooltip("score:Q", title="Score (%)", format=".1f"),
+            alt.Tooltip("modality:N", title="Modality"),
+            alt.Tooltip("reasoning_type:N", title="Reasoning type"),
+        ],
+    )
+    .add_params(modality_filter, reasoning_filter)
+    .transform_filter(
+        "(modality_filter == 'All') || (datum.modality == modality_filter)"
+    )
+    .transform_filter(
+        "(reasoning_filter == 'All') || "
+        "(datum.reasoning_type == reasoning_filter)"
+    )
+    .properties(width=650, height=alt.Step(24))
+    .interactive()
+)
+
+chart
+```
+
